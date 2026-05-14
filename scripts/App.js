@@ -132,7 +132,7 @@ export function App({ data: rawData }) {
             )
         ),
 
-        React.createElement("article", { style: { marginTop: "0.5rem", padding: "0.5rem 0.75rem" } },
+        React.createElement("article", { style: { marginTop: "0.5rem", padding: "0.5rem 0.75rem", zIndex: 50 } },
             React.createElement("div", { className: "filter-row" },
                 allGames.length        > 0 && React.createElement(CheckDropdown, { label: "Game",        options: allGames,        available: availableGames,        selected: filterGame,        onChange: setFilterGame }),
                 allTypes.length        > 0 && React.createElement(CheckDropdown, { label: "Type",        options: allTypes,        available: availableTypes,        selected: filterType,        onChange: setFilterType }),

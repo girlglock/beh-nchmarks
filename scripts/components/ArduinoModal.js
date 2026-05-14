@@ -31,6 +31,11 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
     const hasSerial = manager.hasSerial;
 
     useEffect(() => {
+        document.documentElement.classList.toggle("capturing", running);
+        return () => document.documentElement.classList.remove("capturing");
+    }, [running]);
+
+    useEffect(() => {
         if (!hasSerial) return;
         manager.autoConnect(baud).then(result => {
             if (!result.ok) return;

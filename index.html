@@ -19,22 +19,36 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
   <script src="https://unpkg.com/recharts@2.10.4/umd/Recharts.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
   <script>
-    VANTA.DOTS({
-      el: "#vanta-bg",
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00,
-      backgroundColor: 0x60f,
-      size: 9.90,
-      spacing: 100.00,
-      showLines: false
-    })
+    const hasHWA = (() => {
+      const test = (force) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: force });
+        ctx.moveTo(0, 0);
+        ctx.lineTo(120, 121);
+        ctx.stroke();
+        return ctx.getImageData(0, 0, 200, 200).data.join();
+      };
+      return test(true) !== test(false);
+    })();
+    if (hasHWA) {
+      document.documentElement.classList.add("hwa");
+      window.vantaEffect = VANTA.BIRDS({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        backgroundColor: 0x10a14,
+        color1: 0x11f054,
+        color2: 0x11f054,
+        quantity: 2.00
+      });
+    }
   </script>
   <script type="module" src="scripts/main.js"></script>
 </body>
