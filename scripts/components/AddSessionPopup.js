@@ -1,5 +1,5 @@
-import { TagSelect }    from "./TagSelect.js";
-import { Icon }         from "./Icon.js";
+import { TagSelect } from "./TagSelect.js";
+import { Icon } from "./Icon.js";
 import { BENCHMARKERS, osPresetsFor } from "../constants.js";
 
 const { useState } = React;
@@ -8,12 +8,12 @@ export function AddSessionPopup({ samples, onConfirm, onCancel, initial }) {
     const isEdit = !!initial;
 
     const [form, setForm] = useState({
-        label:       initial?.label           || "Test " + new Date().toLocaleTimeString(),
-        game:        initial?.tags?.game       || "",
-        os:          initial?.tags?.os         || "",
-        api:         initial?.tags?.api        || "",
-        dsp:         initial?.tags?.dsp        || "",
-        de:          initial?.tags?.de         || "",
+        label: initial?.label || "Test " + new Date().toLocaleTimeString(),
+        game: initial?.tags?.game || "",
+        os: initial?.tags?.os || "",
+        api: initial?.tags?.api || "",
+        dsp: initial?.tags?.dsp || "",
+        de: initial?.tags?.de || "",
         benchmarker: initial?.tags?.benchmarker || "girlglock",
         unit: "ms"
     });
@@ -22,13 +22,13 @@ export function AddSessionPopup({ samples, onConfirm, onCancel, initial }) {
 
     const setOS = (v) => {
         const validDSP = osPresetsFor("dsp", v);
-        const validDE  = osPresetsFor("de",  v);
+        const validDE = osPresetsFor("de", v);
         const validAPI = osPresetsFor("api", v);
         setForm(prev => ({
             ...prev,
-            os:  v,
+            os: v,
             dsp: validDSP.includes(prev.dsp) ? prev.dsp : "",
-            de:  validDE.includes(prev.de)   ? prev.de  : "",
+            de: validDE.includes(prev.de) ? prev.de : "",
             api: validAPI.includes(prev.api) ? prev.api : ""
         }));
     };
@@ -58,16 +58,16 @@ export function AddSessionPopup({ samples, onConfirm, onCancel, initial }) {
                     onChange: e => set("label", e.target.value),
                     style: { margin: 0, gridColumn: "2 / -1" }
                 }),
-                L("Game"),  F("game"),
+                L("Game"), F("game"),
                 L("OS"),
                 React.createElement(TagSelect, {
                     fieldKey: "os",
                     value: form.os,
                     onChange: setOS
                 }),
-                L("API"),   F("api", osPresetsFor("api", form.os)),
-                L("DSP"),   F("dsp", osPresetsFor("dsp", form.os)),
-                L("DE"),    F("de",  osPresetsFor("de",  form.os)),
+                L("API"), F("api", osPresetsFor("api", form.os)),
+                L("DSP"), F("dsp", osPresetsFor("dsp", form.os)),
+                L("DE"), F("de", osPresetsFor("de", form.os)),
                 L("Benchmarker"),
                 React.createElement("select", {
                     value: form.benchmarker,

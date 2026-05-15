@@ -1,8 +1,8 @@
-import { Icon }           from "./Icon.js";
+import { Icon } from "./Icon.js";
 import { AddSessionPopup } from "./AddSessionPopup.js";
-import { SerialManager }  from "../SerialManager.js";
-import { calcStats }      from "../utils.js";
-import { LAST_BAUD_KEY }  from "../constants.js";
+import { SerialManager } from "../SerialManager.js";
+import { calcStats } from "../utils.js";
+import { LAST_BAUD_KEY } from "../constants.js";
 
 const { useState, useRef, useEffect } = React;
 
@@ -10,24 +10,24 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
     const managerRef = useRef(new SerialManager());
     const samplesRef = useRef([]);
     const runningRef = useRef(false);
-    const limitRef   = useRef(100);
+    const limitRef = useRef(100);
 
-    const [connected,      setConnected]      = useState(false);
-    const [connLabel,      setConnLabel]      = useState("disconnected");
-    const [running,        setRunning]        = useState(false);
-    const [progress,       setProgress]       = useState({ n: 0, limit: 100 });
-    const [liveAvg,        setLiveAvg]        = useState(null);
-    const [liveImm,        setLiveImm]        = useState(null);
+    const [connected, setConnected] = useState(false);
+    const [connLabel, setConnLabel] = useState("disconnected");
+    const [running, setRunning] = useState(false);
+    const [progress, setProgress] = useState({ n: 0, limit: 100 });
+    const [liveAvg, setLiveAvg] = useState(null);
+    const [liveImm, setLiveImm] = useState(null);
     const [pendingSamples, setPendingSamples] = useState(null);
     const [editingSession, setEditingSession] = useState(null);
-    const [numSamples,     setNumSamples]     = useState(100);
-    const [waitSecs,       setWaitSecs]       = useState(3);
-    const [baud,           setBaud]           = useState(() => {
+    const [numSamples, setNumSamples] = useState(100);
+    const [waitSecs, setWaitSecs] = useState(3);
+    const [baud, setBaud] = useState(() => {
         const stored = localStorage.getItem(LAST_BAUD_KEY);
         return stored ? Number(stored) : 115200;
     });
 
-    const manager   = managerRef.current;
+    const manager = managerRef.current;
     const hasSerial = manager.hasSerial;
 
     useEffect(() => {
@@ -55,7 +55,7 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
             const v = parseFloat(t);
             if (!isNaN(v) && v > 0 && v < 2000) { samplesRef.current.push(v); } else { break; }
         }
-        const n   = samplesRef.current.length;
+        const n = samplesRef.current.length;
         const avg = samplesRef.current.reduce((a, v) => a + v, 0) / n;
         setLiveAvg(avg.toFixed(3));
         setLiveImm(samplesRef.current[n - 1].toFixed(3));
@@ -92,7 +92,7 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
 
     async function startTest() {
         if (!manager.isConnected) return;
-        limitRef.current   = numSamples;
+        limitRef.current = numSamples;
         samplesRef.current = [];
         runningRef.current = true;
         setRunning(true);
@@ -169,8 +169,8 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
                         React.createElement("span", { style: labelStyle }, "Baud rate"),
                         React.createElement("select", { value: baud, onChange: e => setBaud(Number(e.target.value)), style: { margin: 0 } },
                             React.createElement("option", { value: 115200 }, "115200"),
-                            React.createElement("option", { value: 57600  }, "57600"),
-                            React.createElement("option", { value: 9600   }, "9600")
+                            React.createElement("option", { value: 57600 }, "57600"),
+                            React.createElement("option", { value: 9600 }, "9600")
                         )
                     ),
                     React.createElement("label", { style: fieldStyle },
@@ -251,9 +251,9 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
                                 React.createElement("div", { style: { fontSize: "0.85rem" } }, s.label),
                                 React.createElement("div", { className: "serial-session-meta" },
                                     s.samples.length + " samples / mean " + st.mean + " ms" +
-                                    (s.tags.game        ? " / " + s.tags.game        : "") +
-                                    (s.tags.os          ? " / " + s.tags.os          : "") +
-                                    (s.tags.api         ? " / " + s.tags.api         : "") +
+                                    (s.tags.game ? " / " + s.tags.game : "") +
+                                    (s.tags.os ? " / " + s.tags.os : "") +
+                                    (s.tags.api ? " / " + s.tags.api : "") +
                                     (s.tags.benchmarker ? " / " + s.tags.benchmarker : "")
                                 )
                             ),

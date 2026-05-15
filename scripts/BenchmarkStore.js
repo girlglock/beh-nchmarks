@@ -14,11 +14,11 @@ export class BenchmarkStore {
 
     static filter(data, { filterGame = [], filterType = [], filterOS = [], filterAPI = [], filterDE = [], filterBenchmarker = [] } = {}) {
         return data.filter(d => {
-            if (filterGame.length        && !filterGame.includes(d.tags.game))               return false;
-            if (filterType.length        && !filterType.includes(d.tags.type))               return false;
-            if (filterOS.length          && !filterOS.includes(d.tags.os))                   return false;
-            if (filterAPI.length         && !filterAPI.includes(d.tags.api))                 return false;
-            if (filterDE.length          && !filterDE.includes(d.tags.de))                   return false;
+            if (filterGame.length && !filterGame.includes(d.tags.game)) return false;
+            if (filterType.length && !filterType.includes(d.tags.type)) return false;
+            if (filterOS.length && !filterOS.includes(d.tags.os)) return false;
+            if (filterAPI.length && !filterAPI.includes(d.tags.api)) return false;
+            if (filterDE.length && !filterDE.includes(d.tags.de)) return false;
             if (filterBenchmarker.length && !filterBenchmarker.includes(d.tags.benchmarker)) return false;
             return true;
         });
@@ -28,8 +28,8 @@ export class BenchmarkStore {
         const unitMap = {};
         filtered.forEach(d => {
             const game = d.tags.game || "(no game)";
-            const unit = d.tags.unit  || "?";
-            const key  = game + "|||" + unit;
+            const unit = d.tags.unit || "?";
+            const key = game + "|||" + unit;
             if (!unitMap[key]) unitMap[key] = { game, unit, items: [] };
             unitMap[key].items.push(d);
         });

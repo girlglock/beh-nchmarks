@@ -4,12 +4,12 @@ import { Icon } from "./Icon.js";
 const { useState, useRef, useEffect } = React;
 
 export function TagSelect({ fieldKey, value, onChange, presetOptions }) {
-    const [open,      setOpen]      = useState(false);
+    const [open, setOpen] = useState(false);
     const [customVal, setCustomVal] = useState("");
     const [panelStyle, setPanelStyle] = useState({});
     const triggerRef = useRef(null);
 
-    const presets  = presetOptions ?? (PRESET_OPTIONS[fieldKey] || []);
+    const presets = presetOptions ?? (PRESET_OPTIONS[fieldKey] || []);
     const isCustom = value && !presets.includes(value);
 
     useEffect(() => {

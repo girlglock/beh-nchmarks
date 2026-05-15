@@ -1,12 +1,12 @@
 const { useRef, useEffect } = React;
 
-const SCALE    = 4;
+const SCALE = 4;
 const MAX_TILT = 35;
 
 let _active = null;
 
 function getSVGAncestors(el) {
-    let fo   = null;
+    let fo = null;
     let tick = null;
     let node = el.parentNode;
     while (node) {
@@ -34,8 +34,8 @@ function restorePosition(node) {
 function deactivate(el) {
     if (!el) return;
     el.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
-    el.style.transform  = "";
-    el.style.zIndex     = "";
+    el.style.transform = "";
+    el.style.zIndex = "";
 
     const { fo, tick } = getSVGAncestors(el);
     restorePosition(fo);
@@ -52,16 +52,16 @@ export function TiltIcon({ info, size = 20 }) {
         if (!el) return;
 
         const onMove = (e) => {
-            const r      = el.getBoundingClientRect();
+            const r = el.getBoundingClientRect();
             const inside = e.clientX >= r.left && e.clientX <= r.right
-                        && e.clientY >= r.top  && e.clientY <= r.bottom;
-            const x = (e.clientX - r.left) / r.width  - 0.5;
-            const y = (e.clientY - r.top)  / r.height - 0.5;
+                && e.clientY >= r.top && e.clientY <= r.bottom;
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
 
             if (inside) {
                 if (_active !== el) {
                     if (_active) deactivate(_active);
-                    _active         = el;
+                    _active = el;
                     el.style.zIndex = "200";
 
                     const { fo, tick } = getSVGAncestors(el);
@@ -88,11 +88,11 @@ export function TiltIcon({ info, size = 20 }) {
 
     return React.createElement("img", {
         ref,
-        src:       info.url,
-        width:     size,
-        height:    size,
+        src: info.url,
+        width: size,
+        height: size,
         className: "bench-icon-tilt",
-        style:     { display: "block", objectFit: info.cover ? "cover" : "contain", borderRadius: 3 },
-        onError:   e => { e.target.style.display = "none"; },
+        style: { display: "block", objectFit: info.cover ? "cover" : "contain", borderRadius: 3 },
+        onError: e => { e.target.style.display = "none"; },
     });
 }

@@ -3,7 +3,7 @@ import { Icon } from "./Icon.js";
 const { useState, useRef, useEffect } = React;
 
 export function CheckDropdown({ label, options, available, selected, onChange, renderOption }) {
-    const [open, setOpen]          = useState(false);
+    const [open, setOpen] = useState(false);
     const [customVal, setCustomVal] = useState("");
     const ref = useRef(null);
 
@@ -38,7 +38,7 @@ export function CheckDropdown({ label, options, available, selected, onChange, r
         open && React.createElement("div", { className: "filter-panel" },
             options.map(o => {
                 const isAvailable = !available || available.has(o);
-                const isChecked   = selected.includes(o);
+                const isChecked = selected.includes(o);
                 return React.createElement("label", {
                     key: String(o),
                     style: isAvailable ? undefined : { opacity: 0.38, cursor: "default" }

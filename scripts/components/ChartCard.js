@@ -8,8 +8,8 @@ const { useState, useMemo, useRef, useEffect } = React;
 const ROW_H = 56;
 
 function orderItems(items, pinnedIds) {
-    const byId     = Object.fromEntries(items.map(d => [d.id, d]));
-    const pinned   = pinnedIds.filter(id => byId[id]).map(id => byId[id]);
+    const byId = Object.fromEntries(items.map(d => [d.id, d]));
+    const pinned = pinnedIds.filter(id => byId[id]).map(id => byId[id]);
     const unpinned = items
         .filter(d => !pinnedIds.includes(d.id))
         .sort((a, b) => calcStats(a.samples).mean - calcStats(b.samples).mean);
@@ -18,8 +18,8 @@ function orderItems(items, pinnedIds) {
 
 function PinLabel({ x, y, width, height, id, index, isPinned, onTogglePin, onDragStart }) {
     const [hovered, setHovered] = useState(false);
-    const SIZE  = 13;
-    const PAD   = 5;
+    const SIZE = 13;
+    const PAD = 5;
     const iconX = x + PAD;
     const iconY = y + (height - SIZE) / 2;
 
@@ -29,9 +29,9 @@ function PinLabel({ x, y, width, height, id, index, isPinned, onTogglePin, onDra
     },
         React.createElement("rect", {
             x, y, width, height,
-            fill:  "transparent",
+            fill: "transparent",
             style: { cursor: onDragStart ? "grab" : "pointer" },
-            onClick:     onDragStart ? undefined : () => onTogglePin(id),
+            onClick: onDragStart ? undefined : () => onTogglePin(id),
             onMouseDown: onDragStart
                 ? (e) => { e.preventDefault(); onDragStart(id, index, e.clientY); }
                 : undefined
@@ -60,18 +60,18 @@ function PinLabel({ x, y, width, height, id, index, isPinned, onTogglePin, onDra
 }
 
 function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
-    const entry   = chartData?.[index];
-    const name    = entry ? entry.name : (payload.value || "");
-    const d       = entry ? dataLookup[entry.id] : null;
-    const osInfo   = d ? resolveOsIcon(d.tags.os)    : null;
-    const apiInfo  = d ? resolveApiIcon(d.tags.api)  : null;
+    const entry = chartData?.[index];
+    const name = entry ? entry.name : (payload.value || "");
+    const d = entry ? dataLookup[entry.id] : null;
+    const osInfo = d ? resolveOsIcon(d.tags.os) : null;
+    const apiInfo = d ? resolveApiIcon(d.tags.api) : null;
     const gameInfo = d ? resolveGameIcon(d.tags.game) : null;
 
     const ICON_SIZE = 20;
-    const GAP       = 4;
-    const slots     = [gameInfo, osInfo, apiInfo];
-    const count     = slots.filter(Boolean).length;
-    const iconsW    = count > 0 ? count * ICON_SIZE + (count - 1) * GAP + GAP : 0;
+    const GAP = 4;
+    const slots = [gameInfo, osInfo, apiInfo];
+    const count = slots.filter(Boolean).length;
+    const iconsW = count > 0 ? count * ICON_SIZE + (count - 1) * GAP + GAP : 0;
     let col = 0;
 
     return React.createElement("g", { transform: "translate(" + x + "," + y + ")" },
@@ -97,9 +97,9 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     const RC = window.Recharts;
 
     const [draggingId, setDraggingId] = useState(null);
-    const [dropIndex,  setDropIndex]  = useState(null);
+    const [dropIndex, setDropIndex] = useState(null);
 
-    const ordered    = useMemo(
+    const ordered = useMemo(
         () => isPinnedSection ? items : orderItems(items, pinnedIds),
         [items, pinnedIds, isPinnedSection]
     );
@@ -116,22 +116,22 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         };
     });
 
-    const chartHeight  = Math.max(160, ordered.length * ROW_H + 50);
+    const chartHeight = Math.max(160, ordered.length * ROW_H + 50);
     const containerRef = useRef(null);
     const [yAxisWidth, setYAxisWidth] = useState(200);
 
     useEffect(() => {
         if (!containerRef.current) return;
         const canvas = document.createElement("canvas");
-        const ctx    = canvas.getContext("2d");
-        ctx.font     = "11px sans-serif";
-        const maxTW      = Math.max(...chartData.map(d => ctx.measureText(d.name).width));
-        const maxIcons   = Math.max(0, ...items.map(d =>
+        const ctx = canvas.getContext("2d");
+        ctx.font = "11px sans-serif";
+        const maxTW = Math.max(...chartData.map(d => ctx.measureText(d.name).width));
+        const maxIcons = Math.max(0, ...items.map(d =>
             [resolveGameIcon(d.tags.game), resolveOsIcon(d.tags.os), resolveApiIcon(d.tags.api)].filter(Boolean).length
         ));
-        const iconsW     = maxIcons > 0 ? maxIcons * 20 + (maxIcons - 1) * 4 + 4 : 0;
+        const iconsW = maxIcons > 0 ? maxIcons * 20 + (maxIcons - 1) * 4 + 4 : 0;
         const containerW = containerRef.current.offsetWidth;
-        const capped     = Math.min(Math.ceil(maxTW) + iconsW + 8, containerW * 0.55);
+        const capped = Math.min(Math.ceil(maxTW) + iconsW + 8, containerW * 0.55);
         setYAxisWidth(Math.max(90, capped));
     }, [chartData, containerRef.current]);
 
@@ -139,7 +139,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         setDraggingId(id);
         setDropIndex(fromIndex);
         document.body.style.cursor = "grabbing";
-        let curr     = fromIndex;
+        let curr = fromIndex;
         let hasMoved = false;
 
         const onMove = (e) => {
@@ -155,11 +155,11 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
             setDraggingId(null);
             setDropIndex(null);
             document.removeEventListener("mousemove", onMove);
-            document.removeEventListener("mouseup",   onUp);
+            document.removeEventListener("mouseup", onUp);
         };
 
         document.addEventListener("mousemove", onMove);
-        document.addEventListener("mouseup",   onUp);
+        document.addEventListener("mouseup", onUp);
     }
 
     if (!RC) return React.createElement("article", null,
@@ -170,8 +170,8 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         const { index, x, y, width, height } = props;
         const entry = chartData[index];
         if (!entry) return null;
-        const isPinned  = pinnedIds.includes(entry.id);
-        const onDragSt  = isPinnedSection && onReorderPin
+        const isPinned = pinnedIds.includes(entry.id);
+        const onDragSt = isPinnedSection && onReorderPin
             ? (id, idx, cy) => startDrag(id, idx, cy)
             : null;
 
@@ -223,13 +223,13 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
                 }),
                 React.createElement(RC.Bar, { dataKey: "mean", name: "mean", radius: [0, 4, 4, 0], barSize: 28, label: renderLabel, isAnimationActive: false },
                     chartData.map((entry, i) => {
-                        const isDragging   = entry.id === draggingId;
+                        const isDragging = entry.id === draggingId;
                         const isDropTarget = isPinnedSection && draggingId !== null && i === dropIndex && !isDragging;
                         return React.createElement(RC.Cell, {
                             key: i,
-                            fill:        colorMap[entry.id] || COLORS[i % COLORS.length],
+                            fill: colorMap[entry.id] || COLORS[i % COLORS.length],
                             fillOpacity: isDragging ? 0.3 : 1,
-                            stroke:      isDropTarget ? "var(--pico-primary)" : "none",
+                            stroke: isDropTarget ? "var(--pico-primary)" : "none",
                             strokeWidth: isDropTarget ? 2 : 0
                         });
                     }),

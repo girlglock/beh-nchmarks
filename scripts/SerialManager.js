@@ -1,11 +1,11 @@
 export class SerialManager {
     constructor() {
-        this._port       = null;
-        this._reader     = null;
+        this._port = null;
+        this._reader = null;
         this._lineBuffer = "";
     }
 
-    get hasSerial()   { return "serial" in navigator; }
+    get hasSerial() { return "serial" in navigator; }
     get isConnected() { return this._port !== null; }
 
     async getPorts() {
@@ -35,7 +35,7 @@ export class SerialManager {
 
     formatLabel(baudRate, suffix = "") {
         const info = this.getInfo();
-        const vid  = info ? "VID:0x" + (info.usbVendorId || 0).toString(16).padStart(4, "0") : "device";
+        const vid = info ? "VID:0x" + (info.usbVendorId || 0).toString(16).padStart(4, "0") : "device";
         return vid + " @ " + baudRate + (suffix ? " " + suffix : "");
     }
 

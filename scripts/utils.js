@@ -12,7 +12,7 @@ export function resolveApiIcon(api) {
 
 export function resolveGameIcon(game) {
     if (!game) return null;
-    const key   = game.toLowerCase();
+    const key = game.toLowerCase();
     const appId = STEAM_APP_IDS[key];
     if (appId) return steamIconUrl(appId);
     return GAME_ICON_MAP[key] || null;
@@ -32,10 +32,10 @@ export function calcStats(arr) {
     };
     return {
         mean: +mean.toFixed(3),
-        min:  +(pct(0.01)).toFixed(3),
-        max:  +(pct(0.99)).toFixed(3),
-        sd:   +sd.toFixed(3),
-        p50:  +(pct(0.50)).toFixed(3),
-        p95:  +(pct(0.95)).toFixed(3)
+        min: +(pct(0.01)).toFixed(3),
+        max: +(pct(0.99)).toFixed(3),
+        sd: +sd.toFixed(3),
+        p50: +(pct(0.50)).toFixed(3),
+        p95: +(pct(0.95)).toFixed(3)
     };
 }

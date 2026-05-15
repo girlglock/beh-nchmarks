@@ -3,9 +3,9 @@ import { Icon } from "./Icon.js";
 const { useState } = React;
 
 export function ScreenshotPopup({ onConfirm, onCancel }) {
-    const [title,  setTitle]  = useState("");
+    const [title, setTitle] = useState("");
     const [footer, setFooter] = useState("beh-nchmarks");
-    const [width,  setWidth]  = useState("");
+    const [width, setWidth] = useState("");
     const [height, setHeight] = useState("");
 
     return React.createElement("div", {
@@ -50,10 +50,10 @@ export function ScreenshotPopup({ onConfirm, onCancel }) {
                 React.createElement("button", { className: "secondary outline", onClick: onCancel }, "Cancel"),
                 React.createElement("button", {
                     onClick: () => onConfirm({
-                        title:  title.trim(),
+                        title: title.trim(),
                         footer: footer.trim(),
-                        outW:   parseInt(width)  || 0,
-                        outH:   parseInt(height) || 0,
+                        outW: parseInt(width) || 0,
+                        outH: parseInt(height) || 0,
                     })
                 },
                     React.createElement(Icon, { name: "download", className: "icon-sm" }),
