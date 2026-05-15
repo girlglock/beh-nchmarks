@@ -30,6 +30,20 @@ export function App({ data: rawData }) {
     async function takeScreenshot({ title, footer, outW, outH }) {
         if (!pinnedRef.current || typeof html2canvas === "undefined") return;
         setSnapping(true);
+
+        const vantaBg = document.getElementById("vanta-bg");
+        if (vantaBg) vantaBg.style.setProperty("display", "none", "important");
+
+        let origVantaRender = null;
+        if (window.vantaEffect?.renderer?.render) {
+            origVantaRender = window.vantaEffect.renderer.render.bind(window.vantaEffect.renderer);
+            window.vantaEffect.renderer.render = () => { };
+        }
+
+        const snapStyle = document.createElement("style");
+        snapStyle.textContent = "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
+        document.head.appendChild(snapStyle);
+
         const node = pinnedRef.current;
         try {
             const toDataUrl = (url) => new Promise(resolve => {
@@ -125,6 +139,11 @@ export function App({ data: rawData }) {
         } finally {
             node.style.removeProperty("width");
             node.style.removeProperty("max-width");
+            snapStyle.remove();
+            if (vantaBg) vantaBg.style.removeProperty("display");
+            if (window.vantaEffect?.renderer && origVantaRender) {
+                window.vantaEffect.renderer.render = origVantaRender;
+            }
             setSnapping(false);
         }
     }

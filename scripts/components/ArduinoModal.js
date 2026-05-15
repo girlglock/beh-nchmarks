@@ -31,8 +31,30 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
     const hasSerial = manager.hasSerial;
 
     useEffect(() => {
-        document.documentElement.classList.toggle("capturing", running);
-        return () => document.documentElement.classList.remove("capturing");
+        const vantaBg = document.getElementById("vanta-bg");
+        let snapStyle = null;
+        let origRender = null;
+
+        if (running) {
+            if (vantaBg) vantaBg.style.setProperty("display", "none", "important");
+
+            if (window.vantaEffect?.renderer?.render) {
+                origRender = window.vantaEffect.renderer.render.bind(window.vantaEffect.renderer);
+                window.vantaEffect.renderer.render = () => { };
+            }
+
+            snapStyle = document.createElement("style");
+            snapStyle.textContent = "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
+            document.head.appendChild(snapStyle);
+        }
+
+        return () => {
+            if (vantaBg) vantaBg.style.removeProperty("display");
+            if (window.vantaEffect?.renderer && origRender) {
+                window.vantaEffect.renderer.render = origRender;
+            }
+            if (snapStyle) snapStyle.remove();
+        };
     }, [running]);
 
     useEffect(() => {
