@@ -1,5 +1,6 @@
 import { BenchTooltip } from "./BenchTooltip.js";
-import { calcStats, resolveOsIcon, resolveApiIcon } from "../utils.js";
+import { TiltIcon } from "./TiltIcon.js";
+import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
 import { COLORS } from "../constants.js";
 
 const { useState, useMemo, useRef, useEffect } = React;
@@ -62,12 +63,13 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
     const entry   = chartData?.[index];
     const name    = entry ? entry.name : (payload.value || "");
     const d       = entry ? dataLookup[entry.id] : null;
-    const osInfo  = d ? resolveOsIcon(d.tags.os)  : null;
-    const apiInfo = d ? resolveApiIcon(d.tags.api) : null;
+    const osInfo   = d ? resolveOsIcon(d.tags.os)    : null;
+    const apiInfo  = d ? resolveApiIcon(d.tags.api)  : null;
+    const gameInfo = d ? resolveGameIcon(d.tags.game) : null;
 
     const ICON_SIZE = 20;
     const GAP       = 4;
-    const slots     = [osInfo, apiInfo];
+    const slots     = [gameInfo, osInfo, apiInfo];
     const count     = slots.filter(Boolean).length;
     const iconsW    = count > 0 ? count * ICON_SIZE + (count - 1) * GAP + GAP : 0;
     let col = 0;
@@ -81,12 +83,7 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
                 width: ICON_SIZE, height: ICON_SIZE,
                 style: { overflow: "visible" }
             },
-                React.createElement("img", {
-                    xmlns: "http://www.w3.org/1999/xhtml",
-                    src: info.url, width: ICON_SIZE, height: ICON_SIZE,
-                    style: { display: "block" },
-                    onError: e => { e.target.style.display = "none"; }
-                })
+                React.createElement(TiltIcon, { info, size: ICON_SIZE })
             );
         }),
         React.createElement("text", {
@@ -96,7 +93,7 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
     );
 }
 
-export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin }) {
+export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin, compactLabels = false }) {
     const RC = window.Recharts;
 
     const [draggingId, setDraggingId] = useState(null);
@@ -129,9 +126,12 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         const ctx    = canvas.getContext("2d");
         ctx.font     = "11px sans-serif";
         const maxTW      = Math.max(...chartData.map(d => ctx.measureText(d.name).width));
-        const hasIcons   = items.some(d => resolveOsIcon(d.tags.os) || resolveApiIcon(d.tags.api));
+        const maxIcons   = Math.max(0, ...items.map(d =>
+            [resolveGameIcon(d.tags.game), resolveOsIcon(d.tags.os), resolveApiIcon(d.tags.api)].filter(Boolean).length
+        ));
+        const iconsW     = maxIcons > 0 ? maxIcons * 20 + (maxIcons - 1) * 4 + 4 : 0;
         const containerW = containerRef.current.offsetWidth;
-        const capped     = Math.min(Math.ceil(maxTW) + (hasIcons ? 48 : 0) + 8, containerW * 0.55);
+        const capped     = Math.min(Math.ceil(maxTW) + iconsW + 8, containerW * 0.55);
         setYAxisWidth(Math.max(90, capped));
     }, [chartData, containerRef.current]);
 
@@ -174,16 +174,36 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         const onDragSt  = isPinnedSection && onReorderPin
             ? (id, idx, cy) => startDrag(id, idx, cy)
             : null;
-        const ty = y + height / 2;
+
+        let labelText = null;
+        if (compactLabels) {
+            if (width >= 40) {
+                labelText = React.createElement("text", {
+                    x: x + 6, y: y - 2,
+                    dominantBaseline: "auto", textAnchor: "start",
+                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+                }, width >= 130
+                    ? entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"
+                    : entry.mean + " " + entry.unit
+                );
+            }
+        } else {
+            const ty = y + height / 2;
+            if (width >= 160) {
+                labelText = React.createElement("text", {
+                    x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
+                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+                }, entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")");
+            } else if (width >= 60) {
+                labelText = React.createElement("text", {
+                    x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
+                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+                }, entry.mean + " " + entry.unit);
+            }
+        }
+
         return React.createElement("g", null,
-            width >= 160 && React.createElement("text", {
-                x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
-                fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-            }, entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"),
-            width >= 60 && width < 160 && React.createElement("text", {
-                x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
-                fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-            }, entry.mean + " " + entry.unit),
+            labelText,
             React.createElement(PinLabel, { x, y, width, height, id: entry.id, index, isPinned, onTogglePin, onDragStart: onDragSt })
         );
     };
@@ -191,6 +211,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     const renderYTick = (props) => React.createElement(YAxisTick, { ...props, chartData, dataLookup });
 
     return React.createElement("article", { ref: containerRef },
+        React.createElement("span", { className: "chart-unit-label" }, items[0]?.tags?.type || unit),
         React.createElement(RC.ResponsiveContainer, { width: "100%", height: chartHeight },
             React.createElement(RC.BarChart, { data: chartData, layout: "vertical", margin: { top: 4, right: 40, bottom: 4, left: 0 } },
                 React.createElement(RC.CartesianGrid, { strokeDasharray: "3 3", stroke: "var(--pico-muted-border-color)", horizontal: false }),

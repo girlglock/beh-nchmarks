@@ -56,17 +56,48 @@ export const API_ICON_MAP = {
     metal:  { url: "https://cdn.simpleicons.org/apple/888888" },
 };
 
+const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com/steam/apps";
+
+export const STEAM_APP_IDS = {
+    cs2:            730,
+    overwatch:      2357570,
+    "apex legends": 1172470,
+    qc:             611500,
+    "reflex arena": 328070,
+};
+
+export function steamIconUrl(appId) {
+    return { url: STEAM_CDN + "/" + appId + "/hero_capsule.jpg", cover: true };
+}
+
+export const GAME_ICON_MAP = {
+    valorant:  { url: "https://cdn.simpleicons.org/valorant/ff4655",  cover: false },
+    minecraft: { url: "https://static.wikia.nocookie.net/logopedia/images/7/7a/Minecraft_2013_launcher.svg/revision/latest/scale-to-width-down/250?cb=20240606114031", cover: false },
+};
+
 export const BENCHMARKERS = {
     girlglock: {
         id: "girlglock",
         name: "girlglock",
-        pfp: "",
-        link: ""
+        pfp: "https://femboy.beauty/I1uWCZ.jpg",
+        link: "https://x.com/girlglock_",
+        specs: {
+            cpu: "Ryzen 7 9800X3D",
+            gpu: "RTX 4070 Ti",
+            ram: "32GB DDR5",
+            hz: "260hz"
+        }
     },
     cs2kitchen: {
         id: "cs2kitchen",
         name: "cs2kitchen",
-        pfp: "",
-        link: ""
+        pfp: "https://pbs.twimg.com/profile_images/1862572274148159488/BSKE46mA_400x400.jpg",
+        link: "https://x.com/iamcs2kitchen",
+        specs: {
+            cpu: "Ryzen 7 9800X3D",
+            gpu: "RTX 4070 Ti",
+            ram: "32GB DDR5",
+            hz: "260hz"
+        }
     }
 };

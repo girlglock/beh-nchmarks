@@ -1,5 +1,6 @@
-import { calcStats, resolveOsIcon, resolveApiIcon } from "../utils.js";
+import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
 import { BENCHMARKERS } from "../constants.js";
+import { TiltIcon } from "./TiltIcon.js";
 
 export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
     if (!active || !payload?.length) return null;
@@ -7,20 +8,26 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
     const d  = id !== undefined ? dataLookup[id] : null;
     if (!d) return null;
 
-    const s       = calcStats(d.samples);
-    const osInfo  = resolveOsIcon(d.tags.os);
-    const apiInfo = resolveApiIcon(d.tags.api);
-    const bm      = d.tags.benchmarker ? BENCHMARKERS[d.tags.benchmarker] : null;
+    const s        = calcStats(d.samples);
+    const osInfo   = resolveOsIcon(d.tags.os);
+    const apiInfo  = resolveApiIcon(d.tags.api);
+    const gameInfo = resolveGameIcon(d.tags.game);
+    const bm       = d.tags.benchmarker ? BENCHMARKERS[d.tags.benchmarker] : null;
 
     const tagStr = Object.entries(d.tags)
         .filter(([k, v]) => v && v !== d.tags.unit && v !== "n/a" && k !== "benchmarker")
         .map(([k, v]) => k + "=" + v)
         .join("  /  ");
 
+    const specsStr = bm?.specs
+        ? Object.values(bm.specs).filter(Boolean).join("  ·  ")
+        : null;
+
     return React.createElement("div", { className: "bench-tooltip" },
         React.createElement("div", { className: "bench-tooltip-title" },
-            osInfo  && React.createElement("img", { src: osInfo.url,  width: 20, height: 20, style: { display: "inline-block", verticalAlign: "middle" }, onError: e => { e.target.style.display = "none"; } }),
-            apiInfo && React.createElement("img", { src: apiInfo.url, width: 20, height: 20, style: { display: "inline-block", verticalAlign: "middle" }, onError: e => { e.target.style.display = "none"; } }),
+            gameInfo && React.createElement(TiltIcon, { info: gameInfo }),
+            osInfo   && React.createElement(TiltIcon, { info: osInfo }),
+            apiInfo  && React.createElement(TiltIcon, { info: apiInfo }),
             React.createElement("span", { className: "legend-dot", style: { background: colorMap[id] } }),
             d.label
         ),
@@ -44,9 +51,12 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
             bm.pfp
                 ? React.createElement("img", { src: bm.pfp, className: "bm-pfp", alt: bm.name, onError: e => { e.target.style.display = "none"; } })
                 : React.createElement("span", { className: "bm-pfp-fallback" }, bm.name[0].toUpperCase()),
-            bm.link
-                ? React.createElement("a", { href: bm.link, target: "_blank", rel: "noopener noreferrer", className: "bm-link" }, bm.name)
-                : React.createElement("span", { className: "bm-link" }, bm.name)
+            React.createElement("span", { className: "bm-info" },
+                bm.link
+                    ? React.createElement("a", { href: bm.link, target: "_blank", rel: "noopener noreferrer", className: "bm-link" }, bm.name)
+                    : React.createElement("span", { className: "bm-link" }, bm.name),
+                specsStr && React.createElement("span", { className: "bm-specs" }, specsStr)
+            )
         ),
         tagStr && React.createElement("div", { className: "bench-tooltip-tags" }, tagStr)
     );

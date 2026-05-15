@@ -1,11 +1,13 @@
-import { CheckDropdown }  from "./components/CheckDropdown.js";
-import { ChartCard }      from "./components/ChartCard.js";
-import { ArduinoModal }   from "./components/ArduinoModal.js";
-import { Icon }           from "./components/Icon.js";
-import { BenchmarkStore } from "./BenchmarkStore.js";
-import { BENCHMARKERS }   from "./constants.js";
+import { CheckDropdown }    from "./components/CheckDropdown.js";
+import { ChartCard }        from "./components/ChartCard.js";
+import { ArduinoModal }     from "./components/ArduinoModal.js";
+import { ScreenshotPopup }  from "./components/ScreenshotPopup.js";
+import { Icon }             from "./components/Icon.js";
+import { BenchmarkStore }   from "./BenchmarkStore.js";
+import { BENCHMARKERS }     from "./constants.js";
+import { resolveGameIcon }  from "./utils.js";
 
-const { useState, useMemo, useCallback } = React;
+const { useState, useMemo, useCallback, useRef } = React;
 
 export function App({ data: rawData }) {
     const data = useMemo(() => (rawData || []).map((d, i) => ({ ...d, id: d.id !== undefined ? d.id : i + 1000 })), [rawData]);
@@ -20,6 +22,112 @@ export function App({ data: rawData }) {
     const [filterAPI,         setFilterAPI]         = useState([]);
     const [filterDE,          setFilterDE]          = useState([]);
     const [filterBenchmarker, setFilterBenchmarker] = useState([]);
+
+    const pinnedRef = useRef(null);
+    const [snapping,        setSnapping]        = useState(false);
+    const [screenshotOpen,  setScreenshotOpen]  = useState(false);
+
+    async function takeScreenshot({ title, footer, outW, outH }) {
+        if (!pinnedRef.current || typeof html2canvas === "undefined") return;
+        setSnapping(true);
+        const node = pinnedRef.current;
+        try {
+            const toDataUrl = (url) => new Promise(resolve => {
+                fetch(url, { mode: "cors" })
+                    .then(r => r.ok ? r.blob() : Promise.reject())
+                    .then(blob => {
+                        const fr = new FileReader();
+                        fr.onload  = () => resolve(fr.result);
+                        fr.onerror = () => resolve(null);
+                        fr.readAsDataURL(blob);
+                    })
+                    .catch(() => resolve(null));
+            });
+
+            const imgEls   = [...node.querySelectorAll("img")];
+            const dataUrls = new Map();
+            await Promise.all(imgEls.map(async img => {
+                if (!img.src) return;
+                const du = await toDataUrl(img.src);
+                if (du) dataUrls.set(img.src, du);
+            }));
+
+            node.style.setProperty("width",     "680px", "important");
+            node.style.setProperty("max-width", "680px", "important");
+            await new Promise(r => setTimeout(r, 400));
+
+            const captured = await html2canvas(node, {
+                backgroundColor: "#0a0e18",
+                scale:      3,
+                useCORS:    false,
+                allowTaint: false,
+                logging:    false,
+                onclone: (_doc, el) => {
+                    el.querySelector(".game-group-header")?.remove();
+                    el.querySelectorAll("img").forEach(img => {
+                        const du = dataUrls.get(img.src);
+                        if (du) img.src = du;
+                        else img.remove();
+                    });
+                },
+            });
+
+            const cW = captured.width;
+            const cH = captured.height;
+
+            let TW, TH;
+            if      (outW && outH) { TW = outW; TH = outH; }
+            else if (outW)         { TW = outW; TH = Math.round(outW * 4 / 5); }
+            else if (outH)         { TH = outH; TW = Math.round(outH * 5 / 4); }
+            else                   { TH = cH;   TW = Math.round(cH  * 5 / 4); }
+
+            const titleBarH = title ? Math.round(TH * 0.04) : 0;
+            const availH    = TH - titleBarH;
+
+            const out = document.createElement("canvas");
+            out.width  = TW;
+            out.height = TH;
+            const ctx  = out.getContext("2d");
+
+            ctx.fillStyle = "#0a0e18";
+            ctx.fillRect(0, 0, TW, TH);
+
+            const scl   = Math.min(TW / cW, availH / cH);
+            const drawW = Math.round(cW * scl);
+            const drawH = Math.round(cH * scl);
+            const dx    = Math.round((TW - drawW) / 2);
+            const dy    = titleBarH + Math.round((availH - drawH) / 2);
+            ctx.drawImage(captured, dx, dy, drawW, drawH);
+
+            if (title) {
+                ctx.fillStyle    = "rgba(255,255,255,0.88)";
+                ctx.font         = `bold ${Math.round(titleBarH * 0.55)}px sans-serif`;
+                ctx.textAlign    = "center";
+                ctx.textBaseline = "bottom";
+                ctx.fillText(title, TW / 2, dy - 8);
+            }
+
+            if (footer) {
+                const wm = Math.round(TH * 0.022);
+                ctx.fillStyle    = "rgba(255,255,255,0.18)";
+                ctx.font         = `bold ${wm}px sans-serif`;
+                ctx.textAlign    = "right";
+                ctx.textBaseline = "bottom";
+                ctx.fillText(footer, TW - 48, TH - 32);
+            }
+
+            const link    = document.createElement("a");
+            link.download = "pinned-benchmarks.png";
+            link.href     = out.toDataURL("image/png");
+            link.click();
+        } catch (e) {
+            console.error("Screenshot failed:", e);
+        } finally {
+            node.style.removeProperty("width");
+            node.style.removeProperty("max-width");
+            setSnapping(false);
+        }
+    }
 
     const allData = useMemo(() => [...data, ...arduinoSessions], [data, arduinoSessions]);
 
@@ -150,19 +258,29 @@ export function App({ data: rawData }) {
             )
         ),
 
-        hasPinned && React.createElement("div", { className: "charts-section" },
+        hasPinned && React.createElement("div", { className: "charts-section", ref: pinnedRef },
             React.createElement("div", { className: "game-group-header pinned-header" },
                 React.createElement(Icon, { name: "pin", className: "icon-sm" }),
-                React.createElement("h4", null, "Pinned")
+                React.createElement("h4", null, "Pinned"),
+                React.createElement("button", {
+                    className: "screenshot-btn",
+                    onClick:   () => setScreenshotOpen(true),
+                    disabled:  snapping,
+                    title:     "Download as image",
+                },
+                    React.createElement(Icon, { name: snapping ? "loader" : "camera", className: "icon-sm" }),
+                    snapping ? "Capturing..." : "Screenshot"
+                )
             ),
             React.createElement("div", { className: "charts-row" },
                 Object.entries(pinnedByUnit).map(([unit, items]) =>
                     items.length > 0 && React.createElement(ChartCard, {
                         key: unit, unit, items, colorMap,
                         pinnedIds: pinnedIds[unit] || [],
-                        onTogglePin:  (id) => togglePin(unit, id),
+                        onTogglePin:     (id) => togglePin(unit, id),
                         isPinnedSection: true,
-                        onReorderPin: (id, toIdx) => reorderPin(unit, id, toIdx)
+                        onReorderPin:    (id, toIdx) => reorderPin(unit, id, toIdx),
+                        compactLabels:   snapping,
                     })
                 )
             )
@@ -175,7 +293,16 @@ export function App({ data: rawData }) {
         games.map(game =>
             React.createElement("div", { key: game, className: "charts-section" },
                 React.createElement("div", { className: "game-group-header" },
-                    React.createElement(Icon, { name: "monitor", className: "icon-sm" }),
+                    (() => {
+                        const gi = resolveGameIcon(game);
+                        return gi
+                            ? React.createElement("img", {
+                                src: gi.url, width: 28, height: 28,
+                                style: { objectFit: gi.cover ? "cover" : "contain", borderRadius: 4, flexShrink: 0 },
+                                onError: e => { e.target.style.display = "none"; }
+                              })
+                            : React.createElement(Icon, { name: "monitor", className: "icon-sm" });
+                    })(),
                     React.createElement("h4", null, game)
                 ),
                 React.createElement("div", { className: "charts-row" },
@@ -213,6 +340,11 @@ export function App({ data: rawData }) {
             onUpdateSession: updateArduinoSession,
             onExport: exportArduino,
             colorMap
+        }),
+
+        screenshotOpen && React.createElement(ScreenshotPopup, {
+            onConfirm: (cfg) => { setScreenshotOpen(false); takeScreenshot(cfg); },
+            onCancel:  () => setScreenshotOpen(false),
         })
     );
 }

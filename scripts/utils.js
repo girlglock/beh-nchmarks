@@ -1,4 +1,4 @@
-import { OS_ICON_MAP, API_ICON_MAP } from "./constants.js";
+import { OS_ICON_MAP, API_ICON_MAP, GAME_ICON_MAP, STEAM_APP_IDS, steamIconUrl } from "./constants.js";
 
 export function resolveOsIcon(os) {
     if (!os) return null;
@@ -8,6 +8,14 @@ export function resolveOsIcon(os) {
 export function resolveApiIcon(api) {
     if (!api) return null;
     return API_ICON_MAP[api.toLowerCase()] || null;
+}
+
+export function resolveGameIcon(game) {
+    if (!game) return null;
+    const key   = game.toLowerCase();
+    const appId = STEAM_APP_IDS[key];
+    if (appId) return steamIconUrl(appId);
+    return GAME_ICON_MAP[key] || null;
 }
 
 export function calcStats(arr) {

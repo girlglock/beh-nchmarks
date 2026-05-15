@@ -3,6 +3,11 @@
     background: transparent !important;
 }
 
+main.container {
+    max-width: 90vw !important;
+    width: 90vw !important;
+}
+
 #vanta-bg {
     position: fixed;
     inset: 0;
@@ -12,8 +17,8 @@
 article {
     position: relative;
     background: rgba(13, 18, 30, 0.55) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 article:hover {
@@ -82,8 +87,8 @@ article:hover {
     max-height: 300px;
     overflow-y: auto;
     background: rgba(10, 14, 24, 0.78) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--pico-muted-border-color);
     border-radius: var(--pico-border-radius);
     padding: 0.4rem 0;
@@ -208,6 +213,32 @@ article:hover {
     border-bottom-color: var(--pico-primary);
 }
 
+.screenshot-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    background: transparent;
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: var(--pico-border-radius);
+    color: var(--pico-muted-color);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.screenshot-btn:hover:not(:disabled) {
+    border-color: var(--pico-primary);
+    color: var(--pico-primary);
+}
+
+.screenshot-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
 .charts-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
@@ -221,8 +252,8 @@ article:hover {
 
 .bench-tooltip {
     background: rgba(10, 14, 24, 0.82) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--pico-muted-border-color);
     border-radius: var(--pico-border-radius);
     padding: 0.45rem 0.6rem;
@@ -238,6 +269,7 @@ article:hover {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    overflow: visible;
 }
 
 .bench-tooltip-grid {
@@ -296,8 +328,8 @@ article:hover {
 
 .modal-box {
     background: rgba(10, 14, 24, 0.78) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--pico-muted-border-color);
     border-radius: var(--pico-border-radius);
     padding: 1.25rem 1.5rem;
@@ -377,8 +409,8 @@ article:hover {
     position: fixed;
     z-index: 500;
     background: rgba(10, 14, 24, 0.78) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--pico-muted-border-color);
     border-radius: var(--pico-border-radius);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
@@ -605,6 +637,45 @@ article:hover {
 .bm-link:hover {
     color: var(--pico-primary);
     text-decoration: underline;
+}
+
+.bm-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.bm-specs {
+    color: var(--pico-muted-color);
+    font-size: 0.68rem;
+}
+
+.chart-unit-label {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.55rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--pico-muted-color);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.bench-icon-tilt {
+    cursor: default;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.bench-tooltip,
+.bench-tooltip-title,
+.recharts-tooltip-wrapper,
+.recharts-wrapper,
+.recharts-surface {
+    overflow: visible !important;
 }
 
 .bm-filter-option {
