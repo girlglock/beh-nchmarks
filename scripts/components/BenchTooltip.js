@@ -13,14 +13,20 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
     const apiInfo = resolveApiIcon(d.tags.api);
     const gameInfo = resolveGameIcon(d.tags.game);
     const bm = d.tags.benchmarker ? BENCHMARKERS[d.tags.benchmarker] : null;
+    const sys = d.tags.system || null;
+    const ldat = d.tags.ldat || null;
 
     const tagStr = Object.entries(d.tags)
-        .filter(([k, v]) => v && v !== d.tags.unit && v !== "n/a" && k !== "benchmarker")
+        .filter(([k, v]) => v && typeof v !== "object" && v !== d.tags.unit && v !== "n/a" && k !== "benchmarker")
         .map(([k, v]) => k + "=" + v)
         .join("  /  ");
 
-    const specsStr = bm?.specs
-        ? Object.values(bm.specs).filter(Boolean).join("  ·  ")
+    const sysStr = sys
+        ? [sys.cpu, sys.gpu, sys.monitor, sys.rr].filter(Boolean).join("  ·  ")
+        : null;
+
+    const ldatStr = ldat
+        ? [ldat.board_name, ldat.polling_rate_hz ? ldat.polling_rate_hz + " Hz" : null, ldat.baudrate ? ldat.baudrate + " baud" : null].filter(Boolean).join("  ·  ")
         : null;
 
     return React.createElement("div", { className: "bench-tooltip" },
@@ -55,7 +61,8 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
                 bm.link
                     ? React.createElement("a", { href: bm.link, target: "_blank", rel: "noopener noreferrer", className: "bm-link" }, bm.name)
                     : React.createElement("span", { className: "bm-link" }, bm.name),
-                specsStr && React.createElement("span", { className: "bm-specs" }, specsStr)
+                sysStr && React.createElement("span", { className: "bm-specs" }, sysStr),
+                ldatStr && React.createElement("span", { className: "bm-specs" }, ldatStr)
             )
         ),
         tagStr && React.createElement("div", { className: "bench-tooltip-tags" }, tagStr)

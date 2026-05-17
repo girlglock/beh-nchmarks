@@ -2,12 +2,18 @@ import { CheckDropdown } from "./components/CheckDropdown.js";
 import { ChartCard } from "./components/ChartCard.js";
 import { ArduinoModal } from "./components/ArduinoModal.js";
 import { ScreenshotPopup } from "./components/ScreenshotPopup.js";
+import { TeensyModal } from "./components/TeensyModal.js";
 import { Icon } from "./components/Icon.js";
 import { BenchmarkStore } from "./BenchmarkStore.js";
 import { BENCHMARKERS } from "./constants.js";
 import { resolveGameIcon } from "./utils.js";
 
-const { useState, useMemo, useCallback, useRef } = React;
+const { useState, useMemo, useCallback, useRef, useEffect } = React;
+
+function fromURL(key) {
+    const v = new URLSearchParams(window.location.search).get(key);
+    return v ? v.split(",").filter(Boolean) : [];
+}
 
 export function App({ data: rawData }) {
     const data = useMemo(() => (rawData || []).map((d, i) => ({ ...d, id: d.id !== undefined ? d.id : i + 1000 })), [rawData]);
@@ -16,16 +22,29 @@ export function App({ data: rawData }) {
     const [pinnedIds, setPinnedIds] = useState({});
     const [arduinoOpen, setArduinoOpen] = useState(false);
 
-    const [filterGame, setFilterGame] = useState([]);
-    const [filterType, setFilterType] = useState([]);
-    const [filterOS, setFilterOS] = useState([]);
-    const [filterAPI, setFilterAPI] = useState([]);
-    const [filterDE, setFilterDE] = useState([]);
-    const [filterBenchmarker, setFilterBenchmarker] = useState([]);
+    const [filterGame, setFilterGame] = useState(() => fromURL("game"));
+    const [filterType, setFilterType] = useState(() => fromURL("type"));
+    const [filterOS, setFilterOS] = useState(() => fromURL("os"));
+    const [filterAPI, setFilterAPI] = useState(() => fromURL("api"));
+    const [filterDE, setFilterDE] = useState(() => fromURL("de"));
+    const [filterBenchmarker, setFilterBenchmarker] = useState(() => fromURL("benchmarker"));
+
+    useEffect(() => {
+        const p = new URLSearchParams();
+        if (filterGame.length) p.set("game", filterGame.join(","));
+        if (filterType.length) p.set("type", filterType.join(","));
+        if (filterOS.length) p.set("os", filterOS.join(","));
+        if (filterAPI.length) p.set("api", filterAPI.join(","));
+        if (filterDE.length) p.set("de", filterDE.join(","));
+        if (filterBenchmarker.length) p.set("benchmarker", filterBenchmarker.join(","));
+        const qs = p.toString();
+        history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
+    }, [filterGame, filterType, filterOS, filterAPI, filterDE, filterBenchmarker]);
 
     const pinnedRef = useRef(null);
     const [snapping, setSnapping] = useState(false);
     const [screenshotOpen, setScreenshotOpen] = useState(false);
+    const [teensyOpen, setTeensyOpen] = useState(false);
 
     async function takeScreenshot({ title, footer, outW, outH }) {
         if (!pinnedRef.current || typeof html2canvas === "undefined") return;
@@ -337,16 +356,32 @@ export function App({ data: rawData }) {
         ),
 
         React.createElement("div", { style: { textAlign: "center", marginTop: "2rem", paddingBottom: "2.5rem" } },
-            React.createElement("button", {
-                className: "secondary outline",
-                onClick: () => setArduinoOpen(true),
-                style: { display: "inline-flex", alignItems: "center", gap: "0.45rem" }
-            },
-                React.createElement(Icon, { name: "cpu", className: "icon-sm" }),
-                "Capture new",
-                arduinoSessions.length > 0 && React.createElement("span", {
-                    style: { fontSize: "0.72rem", fontWeight: 600, background: "var(--pico-primary)", color: "#fff", borderRadius: "99px", padding: "0.05rem 0.45rem", lineHeight: "1.6" }
-                }, arduinoSessions.length)
+            React.createElement("div", { className: "capture-group" },
+                React.createElement("span", { className: "capture-hint" },
+                    React.createElement(Icon, { name: "cpu", className: "icon-xs" }),
+                    " capture new"
+                ),
+                React.createElement("div", { className: "capture-expand" },
+                    React.createElement("button", {
+                        className: "secondary outline",
+                        onClick: () => setArduinoOpen(true),
+                        style: { display: "inline-flex", alignItems: "center", gap: "0.35rem" }
+                    },
+                        React.createElement(Icon, { name: "cpu", className: "icon-sm" }),
+                        "Arduino",
+                        arduinoSessions.length > 0 && React.createElement("span", {
+                            style: { fontSize: "0.72rem", fontWeight: 600, background: "var(--pico-primary)", color: "#fff", borderRadius: "99px", padding: "0.05rem 0.45rem", lineHeight: "1.6" }
+                        }, arduinoSessions.length)
+                    ),
+                    React.createElement("button", {
+                        className: "secondary outline",
+                        onClick: () => setTeensyOpen(true),
+                        style: { display: "inline-flex", alignItems: "center", gap: "0.35rem" }
+                    },
+                        React.createElement(Icon, { name: "zap", className: "icon-sm" }),
+                        "Teensy"
+                    )
+                )
             )
         ),
 
@@ -364,6 +399,13 @@ export function App({ data: rawData }) {
         screenshotOpen && React.createElement(ScreenshotPopup, {
             onConfirm: (cfg) => { setScreenshotOpen(false); takeScreenshot(cfg); },
             onCancel: () => setScreenshotOpen(false),
+        }),
+
+        React.createElement(TeensyModal, {
+            visible: teensyOpen,
+            onClose: () => setTeensyOpen(false),
+            onAddSession: addArduinoSession,
+            colorMap
         })
     );
 }

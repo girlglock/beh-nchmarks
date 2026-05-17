@@ -1,30 +1,30 @@
 import { Icon } from "./Icon.js";
 import { AddSessionPopup } from "./AddSessionPopup.js";
 import { SerialManager } from "../SerialManager.js";
-import { calcStats } from "../utils.js";
 import { LAST_BAUD_KEY } from "../constants.js";
 
 const { useState, useRef, useEffect } = React;
 
-export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, onRemoveSession, onUpdateSession, onExport, colorMap }) {
+export function TeensyModal({ visible, onClose, onAddSession, colorMap }) {
     const managerRef = useRef(new SerialManager());
     const samplesRef = useRef([]);
-    const runningRef = useRef(false);
-    const limitRef = useRef(100);
+    const csvActiveRef = useRef(false);
+    const trialRef = useRef(0);
+    const validRef = useRef(0);
 
     const [connected, setConnected] = useState(false);
     const [connLabel, setConnLabel] = useState("disconnected");
-    const [running, setRunning] = useState(false);
-    const [progress, setProgress] = useState({ n: 0, limit: 100 });
+    const [phase, setPhase] = useState("idle");
+    const [progress, setProgress] = useState({ n: 0, valid: 0 });
     const [liveAvg, setLiveAvg] = useState(null);
-    const [liveImm, setLiveImm] = useState(null);
+    const [liveMs, setLiveMs] = useState(null);
+    const [countdown, setCountdown] = useState(null);
     const [pendingSamples, setPendingSamples] = useState(null);
-    const [editingSession, setEditingSession] = useState(null);
-    const [numSamples, setNumSamples] = useState(100);
+    const [numSamples, setNumSamples] = useState(1000);
     const [waitSecs, setWaitSecs] = useState(3);
     const [baud, setBaud] = useState(() => {
-        const stored = localStorage.getItem(LAST_BAUD_KEY);
-        return stored ? Number(stored) : 115200;
+        const s = localStorage.getItem(LAST_BAUD_KEY);
+        return s ? Number(s) : 115200;
     });
 
     const manager = managerRef.current;
@@ -35,14 +35,12 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
         let snapStyle = null;
         let origRender = null;
 
-        if (running) {
+        if (phase === "running") {
             if (vantaBg) vantaBg.style.setProperty("display", "none", "important");
-
             if (window.vantaEffect?.renderer?.render) {
                 origRender = window.vantaEffect.renderer.render.bind(window.vantaEffect.renderer);
                 window.vantaEffect.renderer.render = () => { };
             }
-
             snapStyle = document.createElement("style");
             snapStyle.textContent = "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
             document.head.appendChild(snapStyle);
@@ -50,47 +48,67 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
 
         return () => {
             if (vantaBg) vantaBg.style.removeProperty("display");
-            if (window.vantaEffect?.renderer && origRender) {
-                window.vantaEffect.renderer.render = origRender;
-            }
+            if (window.vantaEffect?.renderer && origRender) window.vantaEffect.renderer.render = origRender;
             if (snapStyle) snapStyle.remove();
         };
-    }, [running]);
-
-    useEffect(() => {
-        if (!hasSerial) return;
-        manager.autoConnect(baud).then(result => {
-            if (!result.ok) return;
-            setConnected(true);
-            setConnLabel(manager.formatLabel(baud, result.alreadyOpen ? "(resumed)" : "(auto)"));
-            manager.startReading(handleLine);
-        });
-    }, []);
+    }, [phase]);
 
     function handleLine(line) {
-        const immIdx = line.indexOf("imm:");
-        if (immIdx === -1 || !runningRef.current) return;
-        const afterImm = line.slice(immIdx + 4);
-        for (const part of afterImm.split(/[,\t]/)) {
-            const t = part.trim();
-            if (!t) continue;
-            const v = parseFloat(t);
-            if (!isNaN(v) && v > 0 && v < 2000) { samplesRef.current.push(v); } else { break; }
+        if (line === "Aborted.") {
+            setPhase("idle");
+            setCountdown(null);
+            return;
         }
-        const n = samplesRef.current.length;
-        const avg = samplesRef.current.reduce((a, v) => a + v, 0) / n;
-        setLiveAvg(avg.toFixed(3));
-        setLiveImm(samplesRef.current[n - 1].toFixed(3));
-        setProgress({ n, limit: limitRef.current });
-        if (n >= limitRef.current) {
-            runningRef.current = false;
-            setRunning(false);
-            manager.sendLine("0");
-            const captured = [...samplesRef.current];
+
+        const cdMatch = line.match(/TEST STARTING IN (\d+)/);
+        if (cdMatch) {
+            setPhase("countdown");
+            setCountdown(parseInt(cdMatch[1]));
+            return;
+        }
+
+        if (line.includes("CSV_START")) {
+            csvActiveRef.current = true;
             samplesRef.current = [];
-            setProgress({ n: 0, limit: limitRef.current });
-            setPendingSamples(captured);
+            trialRef.current = 0;
+            validRef.current = 0;
+            setCountdown(null);
+            setPhase("running");
+            return;
         }
+
+        if (line.includes("CSV_END")) {
+            csvActiveRef.current = false;
+            setPhase("done");
+            if (samplesRef.current.length > 0) {
+                setPendingSamples([...samplesRef.current]);
+            }
+            return;
+        }
+
+        if (!csvActiveRef.current) return;
+
+        const parts = line.split(",");
+        if (parts.length < 7) return;
+        const trial = parseInt(parts[0]);
+        if (isNaN(trial)) return;
+
+        trialRef.current = trial;
+        const valid = parts[1].trim() === "1";
+
+        if (valid) {
+            const ms = parseFloat(parts[6]);
+            if (!isNaN(ms) && ms > 0) {
+                samplesRef.current.push(ms);
+                validRef.current++;
+                const n = samplesRef.current.length;
+                const avg = samplesRef.current.reduce((a, v) => a + v, 0) / n;
+                setLiveAvg(avg.toFixed(3));
+                setLiveMs(ms.toFixed(3));
+            }
+        }
+
+        setProgress({ n: trial, valid: validRef.current });
     }
 
     async function connect() {
@@ -101,34 +119,30 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
         localStorage.setItem(LAST_BAUD_KEY, String(baud));
         setConnLabel(manager.formatLabel(baud, result.alreadyOpen ? "(resumed)" : ""));
         setConnected(true);
-        if (!result.alreadyOpen) manager.startReading(handleLine);
+        manager.startReading(handleLine);
     }
 
     async function disconnect() {
-        runningRef.current = false;
-        setRunning(false);
         await manager.close();
         setConnected(false);
         setConnLabel("disconnected");
+        setPhase("idle");
+        setCountdown(null);
+        csvActiveRef.current = false;
     }
 
     async function startTest() {
         if (!manager.isConnected) return;
-        limitRef.current = numSamples;
-        samplesRef.current = [];
-        runningRef.current = true;
-        setRunning(true);
         setLiveAvg(null);
-        setLiveImm(null);
-        setProgress({ n: 0, limit: numSamples });
+        setLiveMs(null);
+        setProgress({ n: 0, valid: 0 });
+        await manager.sendLine("SAMPLES:" + numSamples);
         await manager.sendLine(String(waitSecs));
+        setPhase("countdown");
+        setCountdown(waitSecs);
     }
 
     async function stopTest() {
-        runningRef.current = false;
-        setRunning(false);
-        samplesRef.current = [];
-        setProgress(prev => ({ ...prev, n: 0 }));
         await manager.sendLine("0");
     }
 
@@ -140,26 +154,24 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
             system: form.system,
             ldat: form.ldat,
         };
-        if (editingSession) {
-            onUpdateSession(editingSession.id, { label: form.label, tags });
-            setEditingSession(null);
-            setPendingSamples(null);
-        } else {
-            const id = Date.now();
-            onAddSession({ id, label: form.label || "Session " + id, samples: pendingSamples, tags });
-            setPendingSamples(null);
-        }
-    }
-
-    function handlePopupCancel() {
-        setEditingSession(null);
+        const id = Date.now();
+        onAddSession({ id, label: form.label || "Teensy " + id, samples: pendingSamples, tags });
         setPendingSamples(null);
+        setPhase("idle");
     }
 
-    const pct = progress.limit > 0 ? Math.min(100, (progress.n / progress.limit) * 100) : 0;
+    const pct = progress.n > 0 ? Math.min(100, (progress.n / numSamples) * 100) : 0;
 
-    const labelStyle = { color: "var(--pico-muted-color)", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 };
+    const isActive = phase === "countdown" || phase === "running";
+
+    const statusMsg = phase === "countdown" ? "starting in " + countdown + "s..."
+        : phase === "running" ? "capturing..."
+            : phase === "done" ? "done"
+                : connected ? "ready"
+                    : connLabel;
+
     const fieldStyle = { margin: 0, fontSize: "0.82rem", display: "flex", flexDirection: "column", gap: "0.3rem" };
+    const labelStyle = { color: "var(--pico-muted-color)", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 };
 
     return React.createElement(React.Fragment, null,
         React.createElement("div", {
@@ -168,11 +180,10 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
             onClick: e => { if (e.target === e.currentTarget) onClose(); }
         },
             React.createElement("div", { className: "modal-box arduino-modal" },
-
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" } },
                     React.createElement("h4", { style: { margin: 0, display: "flex", alignItems: "center", gap: "0.45rem" } },
-                        React.createElement(Icon, { name: "cpu", className: "icon-sm" }),
-                        " Arduino Capture"
+                        React.createElement(Icon, { name: "zap", className: "icon-sm" }),
+                        " Teensy Capture"
                     ),
                     React.createElement("button", {
                         className: "secondary outline",
@@ -217,18 +228,21 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
                         connected ? "Disconnect" : "Connect"
                     ),
                     React.createElement("button", {
-                        onClick: startTest, disabled: !connected || running,
+                        onClick: startTest,
+                        disabled: !connected || isActive,
                         style: { display: "flex", alignItems: "center", gap: "0.3rem" }
                     },
                         React.createElement(Icon, { name: "play", className: "icon-xs" }), " Start"
                     ),
                     React.createElement("button", {
-                        className: "secondary outline", onClick: stopTest, disabled: !running,
+                        className: "secondary outline",
+                        onClick: stopTest,
+                        disabled: !isActive,
                         style: { display: "flex", alignItems: "center", gap: "0.3rem" }
                     },
                         React.createElement(Icon, { name: "square", className: "icon-xs" }), " Stop"
                     ),
-                    React.createElement("span", { style: { color: "var(--pico-muted-color)", fontSize: "0.8rem" } }, connLabel)
+                    React.createElement("span", { style: { color: "var(--pico-muted-color)", fontSize: "0.8rem" } }, statusMsg)
                 ),
 
                 React.createElement("div", { className: "prog-row" },
@@ -236,63 +250,29 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
                         React.createElement("div", { className: "prog-fill", style: { width: pct + "%" } })
                     ),
                     React.createElement("span", { style: { fontSize: "0.78rem", color: "var(--pico-muted-color)", whiteSpace: "nowrap" } },
-                        running ? progress.n + " / " + progress.limit : ""
+                        phase === "running" ? progress.n + " / " + numSamples + "  (" + progress.valid + " valid)" : ""
                     )
                 ),
 
                 React.createElement("div", { className: "live-stats" },
                     React.createElement("div", { className: "stat-card" },
                         React.createElement("small", null, "avg"),
-                        React.createElement("strong", null, liveAvg !== null ? liveAvg : "--", React.createElement("span", { style: { fontSize: "0.7rem", fontWeight: "normal" } }, " ms"))
+                        React.createElement("strong", null,
+                            liveAvg !== null ? liveAvg : "--",
+                            React.createElement("span", { style: { fontSize: "0.7rem", fontWeight: "normal" } }, " ms")
+                        )
                     ),
                     React.createElement("div", { className: "stat-card" },
                         React.createElement("small", null, "last"),
-                        React.createElement("strong", null, liveImm !== null ? liveImm : "--", React.createElement("span", { style: { fontSize: "0.7rem", fontWeight: "normal" } }, " ms"))
-                    ),
-                    React.createElement("div", { className: "stat-card" },
-                        React.createElement("small", null, "samples"),
-                        React.createElement("strong", null, progress.n > 0 ? progress.n : "--")
-                    )
-                ),
-
-                arduinoSessions.length > 0 && React.createElement("div", { style: { marginTop: "0.75rem" } },
-                    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" } },
-                        React.createElement("span", { style: { fontSize: "0.82rem", fontWeight: 600 } },
-                            "Captured sessions (" + arduinoSessions.length + ")"
-                        ),
-                        React.createElement("button", {
-                            className: "secondary outline", onClick: onExport,
-                            style: { fontSize: "0.78rem", padding: "0.2rem 0.6rem", display: "flex", alignItems: "center", gap: "0.3rem" }
-                        },
-                            React.createElement(Icon, { name: "download", className: "icon-xs" }), " Export JSON"
+                        React.createElement("strong", null,
+                            liveMs !== null ? liveMs : "--",
+                            React.createElement("span", { style: { fontSize: "0.7rem", fontWeight: "normal" } }, " ms")
                         )
                     ),
-                    arduinoSessions.map(s => {
-                        const st = calcStats(s.samples);
-                        return React.createElement("div", { className: "serial-session", key: s.id },
-                            React.createElement("div", { className: "legend-dot", style: { background: colorMap[s.id] } }),
-                            React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                                React.createElement("div", { style: { fontSize: "0.85rem" } }, s.label),
-                                React.createElement("div", { className: "serial-session-meta" },
-                                    s.samples.length + " samples / mean " + st.mean + " ms" +
-                                    (s.tags.game ? " / " + s.tags.game : "") +
-                                    (s.tags.os ? " / " + s.tags.os : "") +
-                                    (s.tags.api ? " / " + s.tags.api : "") +
-                                    (s.tags.benchmarker ? " / " + s.tags.benchmarker : "")
-                                )
-                            ),
-                            React.createElement("button", {
-                                className: "serial-session-del",
-                                onClick: () => { setEditingSession(s); setPendingSamples(s.samples); },
-                                title: "Edit"
-                            }, React.createElement(Icon, { name: "pencil", className: "icon-xs" })),
-                            React.createElement("button", {
-                                className: "serial-session-del",
-                                onClick: () => onRemoveSession(s.id),
-                                title: "Remove"
-                            }, React.createElement(Icon, { name: "trash-2", className: "icon-xs" }))
-                        );
-                    })
+                    React.createElement("div", { className: "stat-card" },
+                        React.createElement("small", null, "valid"),
+                        React.createElement("strong", null, progress.valid > 0 ? progress.valid : "--")
+                    )
                 )
             )
         ),
@@ -300,9 +280,8 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
         pendingSamples && React.createElement(AddSessionPopup, {
             samples: pendingSamples,
             onConfirm: handlePopupConfirm,
-            onCancel: handlePopupCancel,
-            initial: editingSession || undefined,
-            captureDefaults: { ldat: { board_name: "Arduino", polling_rate_hz: 1000, baudrate: baud } },
+            onCancel: () => { setPendingSamples(null); setPhase("idle"); },
+            captureDefaults: { ldat: { board_name: "Teensy 4.1", polling_rate_hz: 8000, baudrate: baud } },
         })
     );
 }

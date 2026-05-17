@@ -37,16 +37,8 @@ export function TagSelect({ fieldKey, value, onChange, presetOptions }) {
         if (v) select(v);
     };
 
-    return React.createElement("div", { className: "tag-select" },
-        React.createElement("div", {
-            ref: triggerRef,
-            className: "tag-select-trigger" + (value ? " has-value" : "") + (open ? " open" : ""),
-            onClick: openPanel
-        },
-            React.createElement("span", null, value || "select..."),
-            React.createElement(Icon, { name: "chevron-down", className: "icon-xs", style: { opacity: 0.5, flexShrink: 0 } })
-        ),
-        open && React.createElement("div", { className: "tag-select-panel", style: panelStyle },
+    const panel = open && ReactDOM.createPortal(
+        React.createElement("div", { className: "tag-select-panel", style: { ...panelStyle, position: "fixed", zIndex: 9999 } },
             value && React.createElement("div", {
                 className: "tag-select-option tag-select-clear",
                 onClick: () => select("")
@@ -75,6 +67,19 @@ export function TagSelect({ fieldKey, value, onChange, presetOptions }) {
                     style: { padding: "0.2rem 0.5rem", fontSize: "0.72rem" }
                 }, "add")
             )
-        )
+        ),
+        document.body
+    );
+
+    return React.createElement("div", { className: "tag-select" },
+        React.createElement("div", {
+            ref: triggerRef,
+            className: "tag-select-trigger" + (value ? " has-value" : "") + (open ? " open" : ""),
+            onClick: openPanel
+        },
+            React.createElement("span", null, value || "select..."),
+            React.createElement(Icon, { name: "chevron-down", className: "icon-xs", style: { opacity: 0.5, flexShrink: 0 } })
+        ),
+        panel
     );
 }

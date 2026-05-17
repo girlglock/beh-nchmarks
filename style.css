@@ -40,12 +40,30 @@ article:hover {
     inset: 0;
     z-index: 9999;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
 
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+}
+
+.loading-status {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 260px;
+}
+
+.loading-error {
+    font-size: 0.82rem;
+    color: var(--pico-del-color);
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.5;
 }
 
 .filter-row {
@@ -688,4 +706,47 @@ article:hover {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+}
+
+.capture-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: default;
+}
+
+.capture-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--pico-muted-color);
+    opacity: 0.7;
+    transition: opacity 0.18s;
+    pointer-events: none;
+    user-select: none;
+}
+
+.capture-group:hover .capture-hint {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    padding: 0;
+    gap: 0;
+}
+
+.capture-expand {
+    display: flex;
+    gap: 0.4rem;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-width 0.22s ease, opacity 0.18s ease;
+}
+
+.capture-group:hover .capture-expand {
+    max-width: 320px;
+    opacity: 1;
+    pointer-events: auto;
 }
