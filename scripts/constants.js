@@ -64,6 +64,7 @@ export const STEAM_APP_IDS = {
     "apex legends": 1172470,
     qc: 611500,
     "reflex arena": 328070,
+    subnautica2: 1962700
 };
 
 export function steamIconUrl(appId) {
