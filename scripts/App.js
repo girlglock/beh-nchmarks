@@ -6,7 +6,7 @@ import { TeensyModal } from "./components/TeensyModal.js";
 import { Icon } from "./components/Icon.js";
 import { BenchmarkStore } from "./BenchmarkStore.js";
 import { BENCHMARKERS } from "./constants.js";
-import { resolveGameIcon } from "./utils.js";
+import { resolveGameIcon, resolveOsIcon, resolveApiIcon } from "./utils.js";
 
 const { useState, useMemo, useCallback, useRef, useEffect } = React;
 
@@ -28,6 +28,7 @@ export function App({ data: rawData }) {
     const [filterAPI, setFilterAPI] = useState(() => fromURL("api"));
     const [filterDE, setFilterDE] = useState(() => fromURL("de"));
     const [filterBenchmarker, setFilterBenchmarker] = useState(() => fromURL("benchmarker"));
+    const [filterSearch, setFilterSearch] = useState(() => new URLSearchParams(window.location.search).get("q") || "");
 
     useEffect(() => {
         const p = new URLSearchParams();
@@ -37,9 +38,10 @@ export function App({ data: rawData }) {
         if (filterAPI.length) p.set("api", filterAPI.join(","));
         if (filterDE.length) p.set("de", filterDE.join(","));
         if (filterBenchmarker.length) p.set("benchmarker", filterBenchmarker.join(","));
+        if (filterSearch.trim()) p.set("q", filterSearch.trim());
         const qs = p.toString();
         history.replaceState(null, "", qs ? "?" + qs : window.location.pathname);
-    }, [filterGame, filterType, filterOS, filterAPI, filterDE, filterBenchmarker]);
+    }, [filterGame, filterType, filterOS, filterAPI, filterDE, filterBenchmarker, filterSearch]);
 
     const pinnedRef = useRef(null);
     const [snapping, setSnapping] = useState(false);
@@ -210,14 +212,37 @@ export function App({ data: rawData }) {
         filterGame, filterType, filterOS, filterAPI, filterDE, filterBenchmarker
     }), [allData, filterGame, filterType, filterOS, filterAPI, filterDE, filterBenchmarker]);
 
+    const filteredSearched = useMemo(() => {
+        const q = filterSearch.trim().toLowerCase();
+        if (!q) return filtered;
+        const words = q.split(/\s+/).filter(Boolean);
+        return filtered.filter(d => {
+            const haystack = [d.label, ...Object.values(d.tags || {}).map(v => String(v))].join(" ").toLowerCase();
+            return words.every(w => haystack.includes(w));
+        });
+    }, [filtered, filterSearch]);
+
     const filteredUnpinned = useMemo(
-        () => filtered.filter(d => !pinnedAllIds.has(d.id)),
-        [filtered, pinnedAllIds]
+        () => filteredSearched.filter(d => !pinnedAllIds.has(d.id)),
+        [filteredSearched, pinnedAllIds]
     );
 
     const byGame = useMemo(() => BenchmarkStore.groupByGame(filteredUnpinned), [filteredUnpinned]);
     const colorMap = useMemo(() => BenchmarkStore.buildColorMap(allData), [allData]);
-    const games = Object.keys(byGame);
+    const games = Object.keys(byGame).sort((a, b) => a.localeCompare(b));
+
+    const globalYAxisWidth = useMemo(() => {
+        if (allData.length === 0) return 160;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.font = "11px sans-serif";
+        const maxTW = Math.max(...allData.map(d => ctx.measureText(d.label).width));
+        const maxIconCount = Math.max(0, ...allData.map(d =>
+            [resolveGameIcon(d.tags.game), resolveOsIcon(d.tags.os), resolveApiIcon(d.tags.api)].filter(Boolean).length
+        ));
+        const iconsW = maxIconCount > 0 ? maxIconCount * 20 + (maxIconCount - 1) * 4 + 4 : 0;
+        return Math.max(90, Math.min(Math.ceil(maxTW) + iconsW + 8, 240));
+    }, [allData]);
 
     const togglePin = (unit, id) => {
         setPinnedIds(prev => {
@@ -280,6 +305,23 @@ export function App({ data: rawData }) {
 
         React.createElement("article", { style: { marginTop: "0.5rem", padding: "0.5rem 0.75rem", zIndex: 50 } },
             React.createElement("div", { className: "filter-row" },
+                React.createElement("div", { className: "filter-search" + (filterSearch ? " has-text" : "") },
+                    React.createElement(Icon, { name: "search", className: "filter-search-icon" }),
+                    React.createElement("input", {
+                        type: "text",
+                        className: "filter-search-input",
+                        placeholder: "Search labels & tags...",
+                        value: filterSearch,
+                        onChange: e => setFilterSearch(e.target.value),
+                        spellCheck: false,
+                    }),
+                    filterSearch && React.createElement("button", {
+                        className: "filter-search-clear",
+                        onClick: () => setFilterSearch(""),
+                        title: "Clear search",
+                        tabIndex: -1,
+                    }, "×")
+                ),
                 allGames.length > 0 && React.createElement(CheckDropdown, { label: "Game", options: allGames, available: availableGames, selected: filterGame, onChange: setFilterGame }),
                 allTypes.length > 0 && React.createElement(CheckDropdown, { label: "Type", options: allTypes, available: availableTypes, selected: filterType, onChange: setFilterType }),
                 allOS.length > 0 && React.createElement(CheckDropdown, { label: "OS", options: allOS, available: availableOS, selected: filterOS, onChange: setFilterOS }),
@@ -319,6 +361,7 @@ export function App({ data: rawData }) {
                         isPinnedSection: true,
                         onReorderPin: (id, toIdx) => reorderPin(unit, id, toIdx),
                         compactLabels: snapping,
+                        yAxisWidth: globalYAxisWidth,
                     })
                 )
             )
@@ -348,7 +391,8 @@ export function App({ data: rawData }) {
                         React.createElement(ChartCard, {
                             key: unit, unit, items, colorMap,
                             pinnedIds: pinnedIds[unit] || [],
-                            onTogglePin: (id) => togglePin(unit, id)
+                            onTogglePin: (id) => togglePin(unit, id),
+                            yAxisWidth: globalYAxisWidth,
                         })
                     )
                 )

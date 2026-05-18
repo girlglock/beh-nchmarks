@@ -13,9 +13,10 @@ export function resolveApiIcon(api) {
 export function resolveGameIcon(game) {
     if (!game) return null;
     const key = game.toLowerCase();
+    if (GAME_ICON_MAP[key]) return GAME_ICON_MAP[key];
     const appId = STEAM_APP_IDS[key];
     if (appId) return steamIconUrl(appId);
-    return GAME_ICON_MAP[key] || null;
+    return null;
 }
 
 export function calcStats(arr) {

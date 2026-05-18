@@ -1,4 +1,5 @@
 import { App } from "./App.js";
+import { resolveGameIcon, resolveOsIcon, resolveApiIcon } from "./utils.js";
 
 const SPINNER = "https://samherbert.net/svg-loaders/svg-loaders/tail-spin.svg";
 
@@ -58,9 +59,40 @@ async function resolveDataUrls() {
         .map(e => RAW_BASE + e.path);
 }
 
+function collectIconUrls(entries) {
+    const seen = new Set();
+    const urls = [];
+    for (const e of entries) {
+        for (const icon of [
+            resolveGameIcon(e.tags?.game),
+            resolveOsIcon(e.tags?.os),
+            resolveApiIcon(e.tags?.api),
+        ]) {
+            if (icon?.url && !seen.has(icon.url)) {
+                seen.add(icon.url);
+                urls.push(icon.url);
+            }
+        }
+    }
+    return urls;
+}
+
+async function preloadIcons(urls, onProgress) {
+    for (let i = 0; i < urls.length; i++) {
+        await new Promise(resolve => {
+            const img = new Image();
+            img.onload = img.onerror = resolve;
+            img.src = urls[i];
+        });
+        onProgress(i + 1, urls.length);
+        if (i < urls.length - 1) await new Promise(r => setTimeout(r, 100));
+    }
+}
+
 function Root() {
     const [appData, setAppData] = React.useState(null);
-    const [loadStatus, setLoadStatus] = React.useState("resolving file list...");
+    const [loadMsg, setLoadMsg] = React.useState("resolving file list...");
+    const [loadCounter, setLoadCounter] = React.useState(null);
     const [rateError, setRateError] = React.useState(null);
 
     React.useEffect(() => {
@@ -69,9 +101,9 @@ function Root() {
         resolveDataUrls()
             .then(urls => {
                 if (urls.length === 0) {
-                    setLoadStatus("no data files found");
+                    setLoadMsg("no data files found");
                     setTimeout(() => setAppData([]), Math.max(0, 2000 - (Date.now() - t0)));
-                    return [];
+                    return null;
                 }
 
                 let done = 0;
@@ -83,16 +115,28 @@ function Root() {
                             .then(r => r.json())
                             .then(data => {
                                 done++;
-                                setLoadStatus(friendlyPath(url) + "  (" + done + " / " + total + ")");
+                                setLoadMsg(friendlyPath(url));
+                                setLoadCounter("(" + done + " / " + total + ")");
                                 return data;
                             })
                             .catch(() => { done++; return []; })
                     )
                 );
             })
-            .then(arrays => {
+            .then(async arrays => {
                 if (!arrays) return;
                 const merged = arrays.flat().filter(isValidEntry);
+
+                const iconUrls = collectIconUrls(merged);
+                if (iconUrls.length > 0) {
+                    setLoadMsg("loading icons...");
+                    setLoadCounter(null);
+                    await preloadIcons(iconUrls, (done, total) => {
+                        setLoadCounter("(" + done + " / " + total + ")");
+                    });
+                    setLoadCounter(null);
+                }
+
                 const wait = 2000 - (Date.now() - t0);
                 setTimeout(() => setAppData(merged), Math.max(0, wait));
             })
@@ -120,7 +164,10 @@ function Root() {
                 )
                 : React.createElement(React.Fragment, null,
                     React.createElement("img", { src: SPINNER, width: 48, height: 48 }),
-                    React.createElement("span", { className: "loading-status" }, loadStatus)
+                    React.createElement("div", { className: "loading-status-group" },
+                        React.createElement("span", { className: "loading-status" }, loadMsg),
+                        loadCounter !== null && React.createElement("span", { className: "loading-counter" }, loadCounter)
+                    )
                 )
         )
     );

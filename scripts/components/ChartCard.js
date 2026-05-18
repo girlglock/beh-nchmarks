@@ -3,9 +3,16 @@ import { TiltIcon } from "./TiltIcon.js";
 import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
 import { COLORS } from "../constants.js";
 
-const { useState, useMemo, useRef, useEffect } = React;
+const { useState, useMemo } = React;
 
 const ROW_H = 56;
+
+const _ctx = (() => {
+    try { const c = document.createElement("canvas"); c.getContext("2d").font = "11px sans-serif"; return c.getContext("2d"); }
+    catch { return null; }
+})();
+function measureText(str) { return _ctx ? _ctx.measureText(str).width : str.length * 6.5; }
+
 
 function orderItems(items, pinnedIds) {
     const byId = Object.fromEntries(items.map(d => [d.id, d]));
@@ -60,6 +67,8 @@ function PinLabel({ x, y, width, height, id, index, isPinned, onTogglePin, onDra
 }
 
 function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
+    const [tipPos, setTipPos] = useState(null);
+
     const entry = chartData?.[index];
     const name = entry ? entry.name : (payload.value || "");
     const d = entry ? dataLookup[entry.id] : null;
@@ -74,6 +83,10 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
     const iconsW = count > 0 ? count * ICON_SIZE + (count - 1) * GAP + GAP : 0;
     let col = 0;
 
+    const textX = -x + iconsW;
+    const availW = x - iconsW - 8;
+    const overflows = measureText(name) > availW;
+
     return React.createElement("g", { transform: "translate(" + x + "," + y + ")" },
         slots.map((info, i) => {
             if (!info) return React.createElement("g", { key: "e" + i });
@@ -86,14 +99,43 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
                 React.createElement(TiltIcon, { info, size: ICON_SIZE })
             );
         }),
-        React.createElement("text", {
-            x: -x + iconsW, y: 0, dy: "0.355em",
-            textAnchor: "start", fontSize: 11, fill: "var(--pico-color)"
-        }, name)
+        React.createElement("foreignObject", {
+            x: textX, y: -7, width: availW, height: 14,
+            style: { overflow: "hidden", pointerEvents: "none" }
+        },
+            React.createElement("div", {
+                style: {
+                    width: "100%", height: "100%",
+                    overflow: "hidden", display: "flex", alignItems: "center",
+                }
+            },
+                React.createElement("span", {
+                    style: {
+                        fontSize: "11px", color: "var(--pico-color)",
+                        whiteSpace: "nowrap", overflow: "hidden",
+                        textOverflow: "ellipsis", lineHeight: 1,
+                        display: "block",
+                    }
+                }, name)
+            )
+        ),
+        React.createElement("rect", {
+            x: textX, y: -7, width: availW, height: 14,
+            fill: "transparent", style: { cursor: "default" },
+            onMouseMove: e => setTipPos({ x: e.clientX, y: e.clientY }),
+            onMouseLeave: () => setTipPos(null),
+        }),
+        tipPos && ReactDOM.createPortal(
+            React.createElement("div", {
+                className: "label-tooltip",
+                style: { position: "fixed", left: tipPos.x + 14, top: tipPos.y - 36, pointerEvents: "none", zIndex: 10000 }
+            }, name),
+            document.body
+        )
     );
 }
 
-export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin, compactLabels = false }) {
+export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin, compactLabels = false, yAxisWidth = 160 }) {
     const RC = window.Recharts;
 
     const [draggingId, setDraggingId] = useState(null);
@@ -117,23 +159,6 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     });
 
     const chartHeight = Math.max(160, ordered.length * ROW_H + 50);
-    const containerRef = useRef(null);
-    const [yAxisWidth, setYAxisWidth] = useState(200);
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        ctx.font = "11px sans-serif";
-        const maxTW = Math.max(...chartData.map(d => ctx.measureText(d.name).width));
-        const maxIcons = Math.max(0, ...items.map(d =>
-            [resolveGameIcon(d.tags.game), resolveOsIcon(d.tags.os), resolveApiIcon(d.tags.api)].filter(Boolean).length
-        ));
-        const iconsW = maxIcons > 0 ? maxIcons * 20 + (maxIcons - 1) * 4 + 4 : 0;
-        const containerW = containerRef.current.offsetWidth;
-        const capped = Math.min(Math.ceil(maxTW) + iconsW + 8, containerW * 0.55);
-        setYAxisWidth(Math.max(90, capped));
-    }, [chartData, containerRef.current]);
 
     function startDrag(id, fromIndex, clientY) {
         setDraggingId(id);
@@ -210,7 +235,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
 
     const renderYTick = (props) => React.createElement(YAxisTick, { ...props, chartData, dataLookup });
 
-    return React.createElement("article", { ref: containerRef },
+    return React.createElement("article", null,
         React.createElement("span", { className: "chart-unit-label" }, items[0]?.tags?.type || unit),
         React.createElement(RC.ResponsiveContainer, { width: "100%", height: chartHeight },
             React.createElement(RC.BarChart, { data: chartData, layout: "vertical", margin: { top: 4, right: 40, bottom: 4, left: 0 } },
