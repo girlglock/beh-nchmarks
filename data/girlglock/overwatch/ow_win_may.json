@@ -1022,10 +1022,10 @@
       "de": "w11shell",
       "benchmarker": "girlglock",
       "system": {
-        "cpu": "",
-        "gpu": "",
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 4070 Ti",
         "monitor": "",
-        "rr": ""
+        "rr": "260 Hz"
       },
       "ldat": {
         "board_name": "Arduino",
@@ -2057,10 +2057,10 @@
       "de": "w11shell",
       "benchmarker": "girlglock",
       "system": {
-        "cpu": "",
-        "gpu": "",
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 4070 Ti",
         "monitor": "",
-        "rr": ""
+        "rr": "260 Hz"
       },
       "ldat": {
         "board_name": "Arduino",
