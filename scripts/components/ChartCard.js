@@ -5,13 +5,21 @@ import { COLORS } from "../constants.js";
 
 const { useState, useMemo } = React;
 
-const ROW_H = 56;
+const MIN_ROW_H = 56;
+const LINE_H = 14;
 
 const _ctx = (() => {
     try { const c = document.createElement("canvas"); c.getContext("2d").font = "11px sans-serif"; return c.getContext("2d"); }
     catch { return null; }
 })();
 function measureText(str) { return _ctx ? _ctx.measureText(str).width : str.length * 6.5; }
+
+function calcLabelFontSize(name, availW) {
+    const words = name.split(/\s+/);
+    const maxWordW = Math.max(...words.map(w => measureText(w)));
+    if (maxWordW <= availW) return 11;
+    return Math.max(8, 11 * availW / maxWordW);
+}
 
 
 function orderItems(items, pinnedIds) {
@@ -66,9 +74,7 @@ function PinLabel({ x, y, width, height, id, index, isPinned, onTogglePin, onDra
     );
 }
 
-function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
-    const [tipPos, setTipPos] = useState(null);
-
+function YAxisTick({ x, y, payload, index, chartData, dataLookup, rowH = MIN_ROW_H }) {
     const entry = chartData?.[index];
     const name = entry ? entry.name : (payload.value || "");
     const d = entry ? dataLookup[entry.id] : null;
@@ -85,7 +91,10 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
 
     const textX = -x + iconsW;
     const availW = x - iconsW - 8;
-    const overflows = measureText(name) > availW;
+    const fontSize = calcLabelFontSize(name, availW);
+    const lineCount = Math.max(1, Math.ceil(measureText(name) * (fontSize / 11) / availW));
+    const tickH = Math.min(rowH - 4, Math.max(LINE_H, lineCount * (LINE_H + 1)));
+    const tickY = -tickH / 2;
 
     return React.createElement("g", { transform: "translate(" + x + "," + y + ")" },
         slots.map((info, i) => {
@@ -100,37 +109,23 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup }) {
             );
         }),
         React.createElement("foreignObject", {
-            x: textX, y: -7, width: availW, height: 14,
-            style: { overflow: "hidden", pointerEvents: "none" }
+            x: textX, y: tickY, width: availW, height: tickH,
+            style: { overflow: "visible", pointerEvents: "none" }
         },
             React.createElement("div", {
                 style: {
                     width: "100%", height: "100%",
-                    overflow: "hidden", display: "flex", alignItems: "center",
+                    display: "flex", alignItems: "center",
                 }
             },
                 React.createElement("span", {
                     style: {
-                        fontSize: "11px", color: "var(--pico-color)",
-                        whiteSpace: "nowrap", overflow: "hidden",
-                        textOverflow: "ellipsis", lineHeight: 1,
-                        display: "block",
+                        fontSize: fontSize + "px", color: "var(--pico-color)",
+                        whiteSpace: "normal",
+                        lineHeight: 1.3, display: "block",
                     }
                 }, name)
             )
-        ),
-        React.createElement("rect", {
-            x: textX, y: -7, width: availW, height: 14,
-            fill: "transparent", style: { cursor: "default" },
-            onMouseMove: e => setTipPos({ x: e.clientX, y: e.clientY }),
-            onMouseLeave: () => setTipPos(null),
-        }),
-        tipPos && ReactDOM.createPortal(
-            React.createElement("div", {
-                className: "label-tooltip",
-                style: { position: "fixed", left: tipPos.x + 14, top: tipPos.y - 36, pointerEvents: "none", zIndex: 10000 }
-            }, name),
-            document.body
         )
     );
 }
@@ -158,7 +153,17 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         };
     });
 
-    const chartHeight = Math.max(160, ordered.length * ROW_H + 50);
+    const rowH = useMemo(() => {
+        if (!ordered.length) return MIN_ROW_H;
+        const approxAvailW = Math.max(1, yAxisWidth - 8);
+        const maxLines = Math.max(...ordered.map(d => {
+            const fs = calcLabelFontSize(d.label, approxAvailW);
+            return Math.ceil(measureText(d.label) * (fs / 11) / approxAvailW);
+        }));
+        return Math.max(MIN_ROW_H, maxLines * (LINE_H + 1) + 28 + 16);
+    }, [ordered, yAxisWidth]);
+
+    const chartHeight = Math.max(160, ordered.length * rowH + 50);
 
     function startDrag(id, fromIndex, clientY) {
         setDraggingId(id);
@@ -170,7 +175,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         const onMove = (e) => {
             const dy = e.clientY - clientY;
             if (Math.abs(dy) > 4) hasMoved = true;
-            curr = Math.max(0, Math.min(ordered.length - 1, Math.round(fromIndex + dy / ROW_H)));
+            curr = Math.max(0, Math.min(ordered.length - 1, Math.round(fromIndex + dy / rowH)));
             setDropIndex(curr);
         };
 
@@ -233,7 +238,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         );
     };
 
-    const renderYTick = (props) => React.createElement(YAxisTick, { ...props, chartData, dataLookup });
+    const renderYTick = (props) => React.createElement(YAxisTick, { ...props, chartData, dataLookup, rowH });
 
     return React.createElement("article", null,
         React.createElement("span", { className: "chart-unit-label" }, items[0]?.tags?.type || unit),
