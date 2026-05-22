@@ -1012,18 +1012,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -2039,18 +2039,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -3066,18 +3066,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -4090,18 +4090,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -5115,18 +5115,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -6142,18 +6142,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -7169,18 +7169,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   },
   {
@@ -8196,18 +8196,18 @@
       "api": "dx11",
       "dsp": "dwm",
       "de": "w11shell",
-      "benchmarker": "cs2kitchen"
-    },
-    "ldat": {
-      "board_name": "Teensy 4.1",
-      "polling_rate_hz": 8000,
-      "baudrate": 115200
-    },
-    "system": {
-      "cpu": "Ryzen 7 9800X3D",
-      "gpu": "RTX 5070 Ti",
-      "monitor": "ZOWIE XL2566X+",
-      "rr": "400 Hz"
+      "benchmarker": "cs2kitchen",
+      "system": {
+        "cpu": "Ryzen 7 9800X3D",
+        "gpu": "RTX 5070 Ti",
+        "monitor": "ZOWIE XL2566X+",
+        "rr": "400 Hz"
+      },
+      "ldat": {
+        "board_name": "Teensy 4.1",
+        "polling_rate_hz": 8000,
+        "baudrate": 115200
+      }
     }
   }
 ]
