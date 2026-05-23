@@ -1,6 +1,6 @@
 import { BenchTooltip } from "./BenchTooltip.js";
 import { TiltIcon } from "./TiltIcon.js";
-import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
+import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon, resolveDisplaySamples } from "../utils.js";
 import { COLORS } from "../constants.js";
 
 const { useState, useMemo } = React;
@@ -143,7 +143,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     const dataLookup = useMemo(() => Object.fromEntries(items.map(d => [d.id, d])), [items]);
 
     const chartData = ordered.map((d, i) => {
-        const s = calcStats(d.samples);
+        const s = calcStats(resolveDisplaySamples(d));
         return {
             name: d.label, yKey: i + "_" + d.id,
             mean: s.mean,

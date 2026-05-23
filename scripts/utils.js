@@ -19,6 +19,18 @@ export function resolveGameIcon(game) {
     return null;
 }
 
+export function resolveDisplaySamples(d) {
+    if (d.tags.type === "fps" && d.tags.unit === "ms") {
+        return d.samples.map(ms => 1000 / ms);
+    }
+    return d.samples;
+}
+
+export function resolveDisplayUnit(d) {
+    if (d.tags.type === "fps") return "fps";
+    return d.tags.unit || "?";
+}
+
 export function calcStats(arr) {
     const sorted = [...arr].sort((a, b) => a - b);
     const n = arr.length;

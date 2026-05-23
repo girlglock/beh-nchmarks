@@ -1,4 +1,4 @@
-import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
+import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon, resolveDisplaySamples, resolveDisplayUnit } from "../utils.js";
 import { BENCHMARKERS } from "../constants.js";
 import { TiltIcon } from "./TiltIcon.js";
 
@@ -8,7 +8,8 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
     const d = id !== undefined ? dataLookup[id] : null;
     if (!d) return null;
 
-    const s = calcStats(d.samples);
+    const s = calcStats(resolveDisplaySamples(d));
+    const displayUnit = resolveDisplayUnit(d);
     const osInfo = resolveOsIcon(d.tags.os);
     const apiInfo = resolveApiIcon(d.tags.api);
     const gameInfo = resolveGameIcon(d.tags.game);
@@ -39,17 +40,17 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
         ),
         React.createElement("div", { className: "bench-tooltip-grid" },
             React.createElement("span", { className: "bench-tooltip-key" }, "mean"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.mean + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.mean + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "1% low"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.min + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.min + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "99% high"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.max + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.max + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "+/- sd"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.sd + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.sd + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "p50"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.p50 + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.p50 + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "p95"),
-            React.createElement("span", { className: "bench-tooltip-val" }, s.p95 + " " + d.tags.unit),
+            React.createElement("span", { className: "bench-tooltip-val" }, s.p95 + " " + displayUnit),
             React.createElement("span", { className: "bench-tooltip-key" }, "n"),
             React.createElement("span", { className: "bench-tooltip-val" }, d.samples.length)
         ),
