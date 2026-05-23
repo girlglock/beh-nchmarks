@@ -98,6 +98,10 @@ function Root() {
     React.useEffect(() => {
         const t0 = Date.now();
 
+        const localData = fetch("./data/data.json")
+            .then(r => r.ok ? r.json() : [])
+            .catch(() => []);
+
         resolveDataUrls()
             .then(urls => {
                 if (urls.length === 0) {
@@ -125,7 +129,8 @@ function Root() {
             })
             .then(async arrays => {
                 if (!arrays) return;
-                const merged = arrays.flat().filter(isValidEntry);
+                const local = await localData;
+                const merged = [...local, ...arrays.flat()].filter(isValidEntry);
 
                 const iconUrls = collectIconUrls(merged);
                 if (iconUrls.length > 0) {
