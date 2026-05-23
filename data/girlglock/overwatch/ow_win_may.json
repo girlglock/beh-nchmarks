@@ -2,6 +2,7 @@
   {
     "id": 1779366140418,
     "label": "default launch",
+    "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       5.628,
       9.672,
@@ -1037,6 +1038,7 @@
   {
     "id": 1779366368967,
     "label": "reflex + boost, default launch",
+    "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       6.024,
       6.948,

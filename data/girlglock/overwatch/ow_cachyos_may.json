@@ -2,6 +2,7 @@
   {
     "id": 1779361420988,
     "label": "default launch",
+    "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       10.52,
       10.944,
@@ -1037,6 +1038,7 @@
   {
     "id": 1779361650898,
     "label": "reflex + boost, default launch",
+    "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       11.344,
       9.348,
@@ -2072,6 +2074,7 @@
   {
     "id": 1779361983907,
     "label": "reflex + boost, PROTON_ENABLE_WAYLAND=0",
+    "description": "PROTON_ENABLE_WAYLAND=0 %command%, lowest settings, 2560x1440 res",
     "samples": [
       12.492,
       10.4,
@@ -3107,6 +3110,7 @@
   {
     "id": 1779362253519,
     "label": "reflex + boost, PROTON_ENABLE_WAYLAND=0, force allow tearing",
+    "description": "PROTON_ENABLE_WAYLAND=0 %command%, lowest settings, 2560x1440 res",
     "samples": [
       7.536,
       4.888,
