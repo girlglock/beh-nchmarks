@@ -591,9 +591,19 @@ article:hover {
 }
 
 .arduino-modal {
-    min-width: 480px;
+    min-width: min(480px, 92vw);
     max-width: 640px;
     width: 94%;
+display: flex;
+    flex-direction: column;
+}
+
+.arduino-modal-sessions {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 220px;
+    margin-top: 0.75rem;
 }
 
 .serial-toolbar {
