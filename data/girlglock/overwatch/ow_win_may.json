@@ -2,6 +2,7 @@
   {
     "id": 1779366140418,
     "label": "default launch",
+    "group": "fps cap: 600",
     "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       5.628,
@@ -1038,6 +1039,7 @@
   {
     "id": 1779366368967,
     "label": "reflex + boost, default launch",
+    "group": "fps cap: 600",
     "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       6.024,

@@ -1,7 +1,8 @@
 [
   {
     "id": 1778350300157,
-    "label": "xwayland (default cs2 launch), fps_max 0",
+    "label": "xwayland (default cs2 launch)",
+    "group": "comp settings, fps_max 0",
     "description": "no launch options, comp settings, 1280x960 res",
     "samples": [
       11.372,
@@ -1053,7 +1054,8 @@
   },
   {
     "id": 1778350043416,
-    "label": "xwayland (allow tearing forced), fps_max 0",
+    "label": "xwayland (allow tearing forced)",
+    "group": "comp settings, fps_max 0",
     "description": "comp settings, 1280x960 res",
     "samples": [
       8.048,
@@ -2105,7 +2107,8 @@
   },
   {
     "id": 1778351483293,
-    "label": "xwayland, gamescope (allow tearing forced), fps_max 0",
+    "label": "xwayland, gamescope (allow tearing forced)",
+    "group": "comp settings, fps_max 0",
     "description": "comp settings, 1280x960 res",
     "samples": [
       17.328,
@@ -3157,7 +3160,8 @@
   },
   {
     "id": 1778350647012,
-    "label": "wayland (SDL_VIDEO_DRIVER=wayland), fps_max 0",
+    "label": "wayland (SDL_VIDEO_DRIVER=wayland)",
+    "group": "comp settings, fps_max 0",
     "description": "comp settings, 1280x960 res",
     "samples": [
       6.728,
@@ -4210,6 +4214,7 @@
   {
     "id": 1778351837999,
     "label": "wayland, gamescope, fps_max 0",
+    "group": "comp settings, fps_max 0",
     "description": "gamescope -w 1280 -h 960 -W 2560 -H 1440 -f -- %command%, comp settings, 1280x960 res",
     "samples": [
       11.372,
@@ -5262,6 +5267,7 @@
   {
     "id": 1778352210708,
     "label": "x11 (allow tearing forced), fps_max 0",
+    "group": "comp settings, fps_max 0",
     "description": "no launch options, comp settings, 1280x960 res",
     "samples": [
       5.36,

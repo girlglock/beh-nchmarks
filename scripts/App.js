@@ -211,7 +211,7 @@ export function App({ data: rawData }) {
         if (!q) return filtered;
         const words = q.split(/\s+/).filter(Boolean);
         return filtered.filter(d => {
-            const haystack = [d.label, ...Object.values(d.tags || {}).map(v => String(v))].join(" ").toLowerCase();
+            const haystack = [d.label, d.description, ...Object.values(d.tags || {}).map(v => String(v))].filter(Boolean).join(" ").toLowerCase();
             return words.every(w => haystack.includes(w));
         });
     }, [filtered, filterSearch]);
@@ -304,7 +304,7 @@ export function App({ data: rawData }) {
                     React.createElement("input", {
                         type: "text",
                         className: "filter-search-input",
-                        placeholder: "Search labels & tags...",
+                        placeholder: "Search labels, tags & descriptions...",
                         value: filterSearch,
                         onChange: e => setFilterSearch(e.target.value),
                         spellCheck: false,

@@ -2,6 +2,7 @@
   {
     "id": 1779361420988,
     "label": "default launch",
+    "group": "fps cap: 600",
     "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       10.52,
@@ -1038,6 +1039,7 @@
   {
     "id": 1779361650898,
     "label": "reflex + boost, default launch",
+    "group": "fps cap: 600",
     "description": "no launch options, lowest settings, 2560x1440 res",
     "samples": [
       11.344,
@@ -2074,6 +2076,7 @@
   {
     "id": 1779361983907,
     "label": "reflex + boost, PROTON_ENABLE_WAYLAND=0",
+    "group": "fps cap: 600",
     "description": "PROTON_ENABLE_WAYLAND=0 %command%, lowest settings, 2560x1440 res",
     "samples": [
       12.492,
@@ -3110,6 +3113,7 @@
   {
     "id": 1779362253519,
     "label": "reflex + boost, PROTON_ENABLE_WAYLAND=0, force allow tearing",
+    "group": "fps cap: 600",
     "description": "PROTON_ENABLE_WAYLAND=0 %command%, lowest settings, 2560x1440 res",
     "samples": [
       7.536,
