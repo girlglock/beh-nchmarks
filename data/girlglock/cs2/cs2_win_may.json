@@ -1,7 +1,7 @@
 [
   {
     "id": 1778492643678,
-    "label": "reflex + boost, fps_max 0",
+    "label": "reflex + boost",
     "group": "comp settings, fps_max 0",
     "description": "no launch options, comp settings, 1280x960 res",
     "samples": [
@@ -1038,7 +1038,7 @@
   },
   {
     "id": 1778493187214,
-    "label": "reflex + boost, fps_max 0",
+    "label": "reflex + boost",
     "group": "comp settings, fps_max 0",
     "description": "-vulkan, comp settings, 1280x960 res",
     "samples": [

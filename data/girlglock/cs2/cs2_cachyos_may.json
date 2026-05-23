@@ -4213,7 +4213,7 @@
   },
   {
     "id": 1778351837999,
-    "label": "wayland, gamescope, fps_max 0",
+    "label": "wayland, gamescope",
     "group": "comp settings, fps_max 0",
     "description": "gamescope -w 1280 -h 960 -W 2560 -H 1440 -f -- %command%, comp settings, 1280x960 res",
     "samples": [
@@ -5266,7 +5266,7 @@
   },
   {
     "id": 1778352210708,
-    "label": "x11 (allow tearing forced), fps_max 0",
+    "label": "x11 (allow tearing forced)",
     "group": "comp settings, fps_max 0",
     "description": "no launch options, comp settings, 1280x960 res",
     "samples": [

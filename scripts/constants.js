@@ -45,7 +45,7 @@ export const OS_ICON_MAP = {
     arch: { url: "https://cdn.simpleicons.org/archlinux/1793d1" },
     fedora: { url: "https://cdn.simpleicons.org/fedora/51a2da" },
     w10: { url: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Windows_logo_-_2012.svg" },
-    w11: { url: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Windows_logo_-_2012.svg" },
+    w11: { url: "https://www.icosix.com/uploads/icons/2025/12/windows-11.png" },
 };
 
 export const API_ICON_MAP = {
