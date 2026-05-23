@@ -28,16 +28,24 @@ export class BenchmarkStore {
         const unitMap = {};
         filtered.forEach(d => {
             const game = d.tags.game || "(no game)";
-            const unit = d.tags.unit || "?";
+            const unit = d.tags.type === "fps" ? "fps" : (d.tags.unit || "?");
             const key = game + "|||" + unit;
             if (!unitMap[key]) unitMap[key] = { game, unit, items: [] };
             unitMap[key].items.push(d);
         });
+        const UNIT_ORDER = ["ms", "fps"];
         const byGame = {};
         Object.values(unitMap).forEach(g => {
             if (!byGame[g.game]) byGame[g.game] = [];
             byGame[g.game].push(g);
         });
+        Object.values(byGame).forEach(groups =>
+            groups.sort((a, b) => {
+                const ai = UNIT_ORDER.indexOf(a.unit);
+                const bi = UNIT_ORDER.indexOf(b.unit);
+                return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+            })
+        );
         return byGame;
     }
 
