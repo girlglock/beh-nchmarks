@@ -1,15 +1,14 @@
-import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon, resolveDisplaySamples, resolveDisplayUnit } from "../utils.js";
+import { resolveOsIcon, resolveApiIcon, resolveGameIcon } from "../utils.js";
 import { BENCHMARKERS } from "../constants.js";
 import { TiltIcon } from "./TiltIcon.js";
 
-export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
+export function BenchTooltip({ active, payload, dataLookup, statsLookup, colorMap }) {
     if (!active || !payload?.length) return null;
     const id = payload[0]?.payload?.id;
     const d = id !== undefined ? dataLookup[id] : null;
     if (!d) return null;
 
-    const s = calcStats(resolveDisplaySamples(d));
-    const displayUnit = resolveDisplayUnit(d);
+    const { s, displayUnit } = statsLookup[id];
     const osInfo = resolveOsIcon(d.tags.os);
     const apiInfo = resolveApiIcon(d.tags.api);
     const gameInfo = resolveGameIcon(d.tags.game);
@@ -38,6 +37,7 @@ export function BenchTooltip({ active, payload, dataLookup, colorMap }) {
             React.createElement("span", { className: "legend-dot", style: { background: colorMap[id] } }),
             d.label
         ),
+        d.description && React.createElement("div", { className: "bench-tooltip-desc" }, d.description),
         React.createElement("div", { className: "bench-tooltip-grid" },
             React.createElement("span", { className: "bench-tooltip-key" }, "mean"),
             React.createElement("span", { className: "bench-tooltip-val" }, s.mean + " " + displayUnit),

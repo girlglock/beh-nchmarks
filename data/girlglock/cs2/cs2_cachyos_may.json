@@ -2,6 +2,7 @@
   {
     "id": 1778350300157,
     "label": "xwayland (default cs2 launch)",
+    "description": "no launch options, comp settings, 1280x960 res",
     "samples": [
       11.372,
       10.392,

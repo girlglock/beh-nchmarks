@@ -404,6 +404,12 @@ article:hover {
     font-variant-numeric: tabular-nums;
 }
 
+.bench-tooltip-desc {
+    color: var(--pico-muted-color);
+    font-size: 0.72rem;
+    margin-bottom: 0.35rem;
+}
+
 .bench-tooltip-tags {
     margin-top: 0.4rem;
     padding-top: 0.4rem;
