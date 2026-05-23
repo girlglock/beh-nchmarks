@@ -1,6 +1,6 @@
 import { BenchTooltip } from "./BenchTooltip.js";
 import { TiltIcon } from "./TiltIcon.js";
-import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon, resolveDisplaySamples } from "../utils.js";
+import { calcStats, resolveOsIcon, resolveApiIcon, resolveGameIcon, resolveDisplaySamples, resolveDisplayUnit } from "../utils.js";
 import { COLORS } from "../constants.js";
 
 const { useState, useMemo } = React;
@@ -142,16 +142,22 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     );
     const dataLookup = useMemo(() => Object.fromEntries(items.map(d => [d.id, d])), [items]);
 
-    const chartData = ordered.map((d, i) => {
-        const s = calcStats(resolveDisplaySamples(d));
-        return {
-            name: d.label, yKey: i + "_" + d.id,
-            mean: s.mean,
-            error: [+(s.mean - s.min).toFixed(3), +(s.max - s.mean).toFixed(3)],
-            min: s.min, max: s.max,
-            unit, id: d.id
-        };
-    });
+    const { chartData, statsLookup } = useMemo(() => {
+        const statsLookup = {};
+        const chartData = ordered.map((d, i) => {
+            const displayUnit = resolveDisplayUnit(d);
+            const s = calcStats(resolveDisplaySamples(d));
+            statsLookup[d.id] = { s, displayUnit };
+            return {
+                name: d.label, yKey: i + "_" + d.id,
+                mean: s.mean,
+                error: [+(s.mean - s.min).toFixed(3), +(s.max - s.mean).toFixed(3)],
+                min: s.min, max: s.max,
+                unit, id: d.id
+            };
+        });
+        return { chartData, statsLookup };
+    }, [ordered, unit]);
 
     const rowH = useMemo(() => {
         if (!ordered.length) return MIN_ROW_H;
@@ -248,7 +254,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
                 React.createElement(RC.XAxis, { type: "number", tick: { fontSize: 11 }, unit: " " + unit }),
                 React.createElement(RC.YAxis, { type: "category", dataKey: "yKey", width: yAxisWidth, tick: renderYTick }),
                 React.createElement(RC.Tooltip, {
-                    content: React.createElement(BenchTooltip, { dataLookup, colorMap }),
+                    content: React.createElement(BenchTooltip, { dataLookup, statsLookup, colorMap }),
                     cursor: false
                 }),
                 React.createElement(RC.Bar, { dataKey: "mean", name: "mean", radius: [0, 4, 4, 0], barSize: 28, label: renderLabel, isAnimationActive: false },

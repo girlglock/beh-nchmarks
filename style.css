@@ -600,7 +600,7 @@ article:hover {
     min-width: min(480px, 92vw);
     max-width: 640px;
     width: 94%;
-display: flex;
+    display: flex;
     flex-direction: column;
 }
 

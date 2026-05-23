@@ -255,7 +255,7 @@ export function ArduinoModal({ visible, onClose, onAddSession, arduinoSessions, 
                     )
                 ),
 
-                arduinoSessions.length > 0 && React.createElement("div", { style: { marginTop: "0.75rem" } },
+                arduinoSessions.length > 0 && React.createElement("div", { className: "arduino-modal-sessions" },
                     React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" } },
                         React.createElement("span", { style: { fontSize: "0.82rem", fontWeight: 600 } },
                             "Captured sessions (" + arduinoSessions.length + ")"

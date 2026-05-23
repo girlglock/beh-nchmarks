@@ -110,14 +110,12 @@ export function App({ data: rawData }) {
             const cW = captured.width;
             const cH = captured.height;
 
-            let TW, TH;
-            if (outW && outH) { TW = outW; TH = outH; }
-            else if (outW) { TW = outW; TH = Math.round(outW * 4 / 5); }
-            else if (outH) { TH = outH; TW = Math.round(outH * 5 / 4); }
-            else { TH = cH; TW = Math.round(cH * 5 / 4); }
-
-            const titleBarH = title ? Math.round(TH * 0.04) : 0;
-            const availH = TH - titleBarH;
+            const TW = outW || (outH ? Math.round(outH * cW / cH) : cW);
+            const scl = TW / cW;
+            const drawW = TW;
+            const drawH = Math.round(cH * scl);
+            const titleBarH = title ? Math.round(TW * 0.032) : 0;
+            const TH = Math.max(outH || 0, titleBarH + drawH);
 
             const out = document.createElement("canvas");
             out.width = TW;
@@ -127,12 +125,8 @@ export function App({ data: rawData }) {
             ctx.fillStyle = "#0a0e18";
             ctx.fillRect(0, 0, TW, TH);
 
-            const scl = Math.min(TW / cW, availH / cH);
-            const drawW = Math.round(cW * scl);
-            const drawH = Math.round(cH * scl);
-            const dx = Math.round((TW - drawW) / 2);
-            const dy = titleBarH + Math.round((availH - drawH) / 2);
-            ctx.drawImage(captured, dx, dy, drawW, drawH);
+            const dy = titleBarH + Math.round((TH - titleBarH - drawH) / 2);
+            ctx.drawImage(captured, 0, dy, drawW, drawH);
 
             if (title) {
                 ctx.fillStyle = "rgba(255,255,255,0.88)";
@@ -143,7 +137,7 @@ export function App({ data: rawData }) {
             }
 
             if (footer) {
-                const wm = Math.round(TH * 0.022);
+                const wm = Math.round(TW * 0.018);
                 ctx.fillStyle = "rgba(255,255,255,0.18)";
                 ctx.font = `bold ${wm}px sans-serif`;
                 ctx.textAlign = "right";
