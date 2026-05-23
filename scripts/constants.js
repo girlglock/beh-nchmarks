@@ -64,7 +64,8 @@ export const STEAM_APP_IDS = {
     "apex legends": 1172470,
     qc: 611500,
     "reflex arena": 328070,
-    subnautica2: 1962700
+    subnautica2: 1962700,
+    "forza horizon 6": 2483190
 };
 
 export function steamIconUrl(appId) {
