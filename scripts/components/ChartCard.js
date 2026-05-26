@@ -5,7 +5,7 @@ import { COLORS } from "../constants.js";
 
 const { useState, useMemo } = React;
 
-const MIN_ROW_H = 56;
+const MIN_ROW_H = 100;
 const LINE_H = 14;
 const SEPARATOR_H = 28;
 const END_SEPARATOR_H = 14;
@@ -24,7 +24,36 @@ function calcLabelFontSize(name, availW) {
 }
 
 
-function orderItemsGrouped(items, pinnedIds) {
+function groupPinnedItems(items) {
+    const groupOrder = [];
+    const groupMap = {};
+    const ungrouped = [];
+
+    items.forEach(d => {
+        if (d.group) {
+            if (!groupMap[d.group]) {
+                groupMap[d.group] = [];
+                groupOrder.push(d.group);
+            }
+            groupMap[d.group].push(d);
+        } else {
+            ungrouped.push(d);
+        }
+    });
+
+    if (groupOrder.length === 0) return items;
+
+    const result = [];
+    groupOrder.forEach(groupName => {
+        result.push({ __separator: true, __groupName: groupName, id: "sep__" + groupName });
+        result.push(...groupMap[groupName]);
+        result.push({ __separator: true, __endSeparator: true, id: "endsep__" + groupName });
+    });
+    result.push(...ungrouped);
+    return result;
+}
+
+function orderItemsGrouped(items, pinnedIds, unit) {
     const byId = Object.fromEntries(items.map(d => [d.id, d]));
     const pinned = pinnedIds.filter(id => byId[id]).map(id => byId[id]);
     const unpinned = items.filter(d => !pinnedIds.includes(d.id));
@@ -40,7 +69,11 @@ function orderItemsGrouped(items, pinnedIds) {
         }
     });
 
-    const sortByMean = arr => arr.sort((a, b) => calcStats(a.samples).mean - calcStats(b.samples).mean);
+    const sortByMean = arr => arr.sort((a, b) => {
+        const ma = calcStats(resolveDisplaySamples(a)).mean;
+        const mb = calcStats(resolveDisplaySamples(b)).mean;
+        return unit === "fps" ? mb - ma : ma - mb;
+    });
     Object.values(groupMap).forEach(sortByMean);
     sortByMean(ungrouped);
 
@@ -193,8 +226,8 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
     const [dropIndex, setDropIndex] = useState(null);
 
     const ordered = useMemo(
-        () => isPinnedSection ? items : orderItemsGrouped(items, pinnedIds),
-        [items, pinnedIds, isPinnedSection]
+        () => isPinnedSection ? groupPinnedItems(items) : orderItemsGrouped(items, pinnedIds, unit),
+        [items, pinnedIds, isPinnedSection, unit]
     );
     const dataLookup = useMemo(() => Object.fromEntries(items.map(d => [d.id, d])), [items]);
 
@@ -250,7 +283,10 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
 
         const onUp = () => {
             document.body.style.cursor = "";
-            if (hasMoved && onReorderPin) onReorderPin(id, curr);
+            if (hasMoved && onReorderPin) {
+                const dataIdx = ordered.slice(0, curr).filter(d => !d.__separator).length;
+                onReorderPin(id, dataIdx);
+            }
             setDraggingId(null);
             setDropIndex(null);
             document.removeEventListener("mousemove", onMove);
@@ -275,30 +311,15 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
             : null;
 
         let labelText = null;
-        if (compactLabels) {
-            if (width >= 40) {
-                labelText = React.createElement("text", {
-                    x: x + 6, y: y - 2,
-                    dominantBaseline: "auto", textAnchor: "start",
-                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-                }, width >= 130
-                    ? entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"
-                    : entry.mean + " " + entry.unit
-                );
-            }
-        } else {
-            const ty = y + height / 2;
-            if (width >= 160) {
-                labelText = React.createElement("text", {
-                    x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
-                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-                }, entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")");
-            } else if (width >= 60) {
-                labelText = React.createElement("text", {
-                    x: x + 24, y: ty, dominantBaseline: "middle", textAnchor: "start",
-                    fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-                }, entry.mean + " " + entry.unit);
-            }
+        if (width >= 40) {
+            labelText = React.createElement("text", {
+                x: x + 6, y: y - 2,
+                dominantBaseline: "auto", textAnchor: "start",
+                fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+            }, width >= 130
+                ? entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"
+                : entry.mean + " " + entry.unit
+            );
         }
 
         return React.createElement("g", null,
