@@ -1,9 +1,9 @@
 [
     {
         "id": 1779817560866,
-        "group": "high settings",
+        "group": "high settings, cachyos wayland",
         "description": "SDL_VIDEO_DRIVER=wayland MANGOHUD=1 %command%, reflex + boost, msaa x2, everything else highest, 2560x1440",
-        "label": "fps_max 0, wayland",
+        "label": "fps_max 300",
         "samples": [
             9.264,
             9.36,
@@ -1038,9 +1038,9 @@
     },
     {
         "id": 1779817188131,
-        "group": "high settings",
+        "group": "high settings, cachyos wayland",
         "description": "SDL_VIDEO_DRIVER=wayland MANGOHUD=1 %command%, reflex + boost, msaa x2, everything else highest, 2560x1440",
-        "label": "fps_max 300, wayland",
+        "label": "fps_max 0",
         "samples": [
             8.572,
             7.212,
@@ -2075,7 +2075,7 @@
     },
     {
         "id": 1779816893477,
-        "group": "comp settings",
+        "group": "comp settings, cachyos wayland",
         "description": "SDL_VIDEO_DRIVER=wayland MANGOHUD=1 %command%, reflex + boost, 1920x1440",
         "label": "fps_max 300, wayland",
         "samples": [
@@ -3112,7 +3112,7 @@
     },
     {
         "id": 1779816671334,
-        "group": "comp settings",
+        "group": "comp settings, cachyos wayland",
         "description": "SDL_VIDEO_DRIVER=wayland MANGOHUD=1 %command%, reflex + boost, 1920x1440",
         "label": "fps max 0, wayland",
         "samples": [

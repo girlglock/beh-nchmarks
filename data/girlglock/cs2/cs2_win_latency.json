@@ -1,7 +1,7 @@
 [
   {
     "id": 1779809659009,
-    "group": "high settings",
+    "group": "high settings, win11",
     "description": "reflex + boost, msaa x2, everything else highest, 2560x1440",
     "label": "fps_max 0",
     "samples": [
@@ -1038,7 +1038,7 @@
   },
   {
     "id": 1779809950259,
-    "group": "high settings",
+    "group": "high settings, win11",
     "description": "reflex + boost, msaa x2, everything else highest, 2560x1440",
     "label": "fps_max 300",
     "samples": [
@@ -2075,7 +2075,7 @@
   },
   {
     "id": 1779810285114,
-    "group": "comp settings",
+    "group": "comp settings, win11",
     "description": "reflex + boost, 1920x1440",
     "label": "fps_max 300",
     "samples": [
@@ -3112,7 +3112,7 @@
   },
   {
     "id": 1779810723369,
-    "group": "comp settings",
+    "group": "comp settings, win11",
     "description": "reflex + boost, 1920x1440",
     "label": "fps max 0",
     "samples": [
