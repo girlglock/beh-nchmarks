@@ -19,7 +19,7 @@ function measureText(str) { return _ctx ? _ctx.measureText(str).width : str.leng
 function calcLabelFontSize(name, availW) {
     const words = name.split(/\s+/);
     const maxWordW = Math.max(...words.map(w => measureText(w)));
-    if (maxWordW <= availW) return 11;
+    if (maxWordW * 1.5 <= availW) return 16.5;
     return Math.max(8, 11 * availW / maxWordW);
 }
 
@@ -152,7 +152,7 @@ function GroupSeparatorTick({ x, y, groupName, isEndSeparator }) {
             React.createElement("div", {
                 xmlns: "http://www.w3.org/1999/xhtml",
                 style: {
-                    fontSize: "9px", fontWeight: 700,
+                    fontSize: "13.5px", fontWeight: 700,
                     textTransform: "uppercase", letterSpacing: "0.09em",
                     color: "var(--pico-primary)", opacity: 0.8,
                     display: "flex", alignItems: "center",
@@ -315,7 +315,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
             labelText = React.createElement("text", {
                 x: x + 6, y: y - 2,
                 dominantBaseline: "auto", textAnchor: "start",
-                fontSize: 10, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+                fontSize: 15, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
             }, width >= 130
                 ? entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"
                 : entry.mean + " " + entry.unit
@@ -339,7 +339,7 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
         React.createElement(RC.ResponsiveContainer, { width: "100%", height: chartHeight },
             React.createElement(RC.BarChart, { data: chartData, layout: "vertical", margin: { top: 4, right: 40, bottom: 4, left: 0 } },
                 React.createElement(RC.CartesianGrid, { strokeDasharray: "3 3", stroke: "var(--pico-muted-border-color)", horizontal: false }),
-                React.createElement(RC.XAxis, { type: "number", tick: { fontSize: 11 }, unit: " " + unit }),
+                React.createElement(RC.XAxis, { type: "number", tick: { fontSize: 16.5 }, unit: " " + unit }),
                 React.createElement(RC.YAxis, { type: "category", dataKey: "yKey", width: yAxisWidth, tick: renderYTick }),
                 React.createElement(RC.Tooltip, {
                     content: React.createElement(BenchTooltip, { dataLookup, statsLookup, colorMap }),
