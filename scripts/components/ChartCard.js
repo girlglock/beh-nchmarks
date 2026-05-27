@@ -53,7 +53,7 @@ function groupPinnedItems(items) {
     return result;
 }
 
-function orderItemsGrouped(items, pinnedIds, unit) {
+function orderItemsGrouped(items, pinnedIds, unit, matchOrder = null) {
     const byId = Object.fromEntries(items.map(d => [d.id, d]));
     const pinned = pinnedIds.filter(id => byId[id]).map(id => byId[id]);
     const unpinned = items.filter(d => !pinnedIds.includes(d.id));
@@ -69,6 +69,32 @@ function orderItemsGrouped(items, pinnedIds, unit) {
         }
     });
 
+    const result = [...pinned];
+
+    if (matchOrder) {
+        const posOf = (label, group) => {
+            const idx = matchOrder.indexOf((group || '') + "|||" + label);
+            return idx === -1 ? Infinity : idx;
+        };
+        Object.entries(groupMap).forEach(([groupName, arr]) => {
+            arr.sort((a, b) => posOf(a.label, groupName) - posOf(b.label, groupName));
+        });
+        ungrouped.sort((a, b) => posOf(a.label, null) - posOf(b.label, null));
+        Object.keys(groupMap)
+            .sort((a, b) => {
+                const minA = Math.min(...groupMap[a].map(d => posOf(d.label, a)));
+                const minB = Math.min(...groupMap[b].map(d => posOf(d.label, b)));
+                return minA - minB;
+            })
+            .forEach(groupName => {
+                result.push({ __separator: true, __groupName: groupName, id: "sep__" + groupName });
+                result.push(...groupMap[groupName]);
+                result.push({ __separator: true, __endSeparator: true, id: "endsep__" + groupName });
+            });
+        result.push(...ungrouped);
+        return result;
+    }
+
     const sortByMean = arr => arr.sort((a, b) => {
         const ma = calcStats(resolveDisplaySamples(a)).mean;
         const mb = calcStats(resolveDisplaySamples(b)).mean;
@@ -77,7 +103,6 @@ function orderItemsGrouped(items, pinnedIds, unit) {
     Object.values(groupMap).forEach(sortByMean);
     sortByMean(ungrouped);
 
-    const result = [...pinned];
     Object.keys(groupMap).sort().forEach(groupName => {
         result.push({ __separator: true, __groupName: groupName, id: "sep__" + groupName });
         result.push(...groupMap[groupName]);
@@ -219,15 +244,15 @@ function YAxisTick({ x, y, payload, index, chartData, dataLookup, rowH = MIN_ROW
     );
 }
 
-export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin, compactLabels = false, yAxisWidth = 160 }) {
+export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPinnedSection = false, onReorderPin, compactLabels = false, yAxisWidth = 160, matchOrder = null }) {
     const RC = window.Recharts;
 
     const [draggingId, setDraggingId] = useState(null);
     const [dropIndex, setDropIndex] = useState(null);
 
     const ordered = useMemo(
-        () => isPinnedSection ? groupPinnedItems(items) : orderItemsGrouped(items, pinnedIds, unit),
-        [items, pinnedIds, isPinnedSection, unit]
+        () => isPinnedSection ? groupPinnedItems(items) : orderItemsGrouped(items, pinnedIds, unit, matchOrder),
+        [items, pinnedIds, isPinnedSection, unit, matchOrder]
     );
     const dataLookup = useMemo(() => Object.fromEntries(items.map(d => [d.id, d])), [items]);
 
@@ -310,17 +335,11 @@ export function ChartCard({ unit, items, colorMap, pinnedIds, onTogglePin, isPin
             ? (id, idx, cy) => startDrag(id, idx, cy)
             : null;
 
-        let labelText = null;
-        if (width >= 40) {
-            labelText = React.createElement("text", {
-                x: x + 6, y: y - 2,
-                dominantBaseline: "auto", textAnchor: "start",
-                fontSize: 15, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
-            }, width >= 130
-                ? entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")"
-                : entry.mean + " " + entry.unit
-            );
-        }
+        const labelText = React.createElement("text", {
+            x: x + 6, y: y - 2,
+            dominantBaseline: "auto", textAnchor: "start",
+            fontSize: 15, fontFamily: "monospace", fill: "rgba(255,255,255,0.82)", pointerEvents: "none"
+        }, entry.mean + " " + entry.unit + " (1%: " + entry.min + ", 99%: " + entry.max + ")");
 
         return React.createElement("g", null,
             labelText,

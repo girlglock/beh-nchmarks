@@ -6,7 +6,7 @@ import { TeensyModal } from "./components/TeensyModal.js";
 import { Icon } from "./components/Icon.js";
 import { BenchmarkStore } from "./BenchmarkStore.js";
 import { BENCHMARKERS } from "./constants.js";
-import { resolveGameIcon, resolveOsIcon, resolveApiIcon } from "./utils.js";
+import { resolveGameIcon, resolveOsIcon, resolveApiIcon, calcStats, resolveDisplaySamples } from "./utils.js";
 
 const { useState, useMemo, useCallback, useRef, useEffect } = React;
 
@@ -381,14 +381,34 @@ export function App({ data: rawData }) {
                     React.createElement("h4", null, game)
                 ),
                 React.createElement("div", { className: "charts-row" },
-                    byGame[game].map(({ unit, items }) =>
-                        React.createElement(ChartCard, {
+                    byGame[game].map(({ unit, items }) => {
+                        let matchOrder = null;
+                        if (unit === "fps") {
+                            const latencyGroup = byGame[game].find(g => g.unit === "ms");
+                            if (latencyGroup) {
+                                const pinnedLatencyIds = pinnedIds["ms"] || [];
+                                const unpinnedLatency = latencyGroup.items.filter(d => !pinnedLatencyIds.includes(d.id));
+                                const meanOf = d => calcStats(resolveDisplaySamples(d)).mean;
+                                const sortByMean = arr => [...arr].sort((a, b) => meanOf(a) - meanOf(b));
+                                const gMap = {}, ungrouped = [];
+                                unpinnedLatency.forEach(d => {
+                                    if (d.group) { if (!gMap[d.group]) gMap[d.group] = []; gMap[d.group].push(d); }
+                                    else ungrouped.push(d);
+                                });
+                                const orderedLatency = [];
+                                Object.keys(gMap).sort().forEach(g => sortByMean(gMap[g]).forEach(d => orderedLatency.push(d)));
+                                sortByMean(ungrouped).forEach(d => orderedLatency.push(d));
+                                matchOrder = orderedLatency.map(d => (d.group || '') + "|||" + d.label);
+                            }
+                        }
+                        return React.createElement(ChartCard, {
                             key: unit, unit, items, colorMap,
                             pinnedIds: pinnedIds[unit] || [],
                             onTogglePin: (id) => togglePin(unit, id),
                             yAxisWidth: globalYAxisWidth,
-                        })
-                    )
+                            matchOrder,
+                        });
+                    })
                 )
             )
         ),
