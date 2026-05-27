@@ -2075,7 +2075,7 @@
   },
   {
     "id": 1779810285114,
-    "group": "comp settings, win11",
+    "group": "comp settings, Windows 11",
     "description": "reflex + boost, 1920x1440",
     "label": "fps_max 300",
     "samples": [
@@ -3112,7 +3112,7 @@
   },
   {
     "id": 1779810723369,
-    "group": "comp settings, win11",
+    "group": "comp settings, Windows 11",
     "description": "reflex + boost, 1920x1440",
     "label": "fps max 0",
     "samples": [
