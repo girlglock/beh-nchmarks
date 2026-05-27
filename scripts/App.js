@@ -291,7 +291,13 @@ export function App({ data: rawData }) {
                     "aria-label": "beh",
                     style: { display: "flex", alignItems: "center", gap: "0.25rem", textDecoration: "none", color: "inherit" }
                 },
-                    React.createElement("img", { src: "https://cdn.7tv.app/emote/01H5SZNXBG0009A24KGM1D8PHV/1x.gif", width: 64, height: 64, alt: "beh" }),
+                    React.createElement("img", {
+                        src: "https://cdn.7tv.app/emote/01H5SZNXBG0009A24KGM1D8PHV/1x.gif",
+                        width: 64,
+                        height: 64,
+                        alt: "beh",
+                        loading: "lazy"
+                    }),
                     "nchmarks"
                 )
             )

@@ -91,6 +91,7 @@ export function TiltIcon({ info, size = 20 }) {
         src: info.url,
         width: size,
         height: size,
+        loading: "lazy",
         className: "bench-icon-tilt",
         style: { display: "block", objectFit: info.cover ? "cover" : "contain", borderRadius: 3 },
         onError: e => { e.target.style.display = "none"; },

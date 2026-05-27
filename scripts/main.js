@@ -1,5 +1,4 @@
 import { App } from "./App.js";
-import { resolveGameIcon, resolveOsIcon, resolveApiIcon } from "./utils.js";
 
 const SPINNER = "https://samherbert.net/svg-loaders/svg-loaders/tail-spin.svg";
 
@@ -59,36 +58,6 @@ async function resolveDataUrls() {
         .map(e => RAW_BASE + e.path);
 }
 
-function collectIconUrls(entries) {
-    const seen = new Set();
-    const urls = [];
-    for (const e of entries) {
-        for (const icon of [
-            resolveGameIcon(e.tags?.game),
-            resolveOsIcon(e.tags?.os),
-            resolveApiIcon(e.tags?.api),
-        ]) {
-            if (icon?.url && !seen.has(icon.url)) {
-                seen.add(icon.url);
-                urls.push(icon.url);
-            }
-        }
-    }
-    return urls;
-}
-
-async function preloadIcons(urls, onProgress) {
-    for (let i = 0; i < urls.length; i++) {
-        await new Promise(resolve => {
-            const img = new Image();
-            img.onload = img.onerror = resolve;
-            img.src = urls[i];
-        });
-        onProgress(i + 1, urls.length);
-        if (i < urls.length - 1) await new Promise(r => setTimeout(r, 100));
-    }
-}
-
 function Root() {
     const [appData, setAppData] = React.useState(null);
     const [loadMsg, setLoadMsg] = React.useState("resolving file list...");
@@ -96,8 +65,6 @@ function Root() {
     const [rateError, setRateError] = React.useState(null);
 
     React.useEffect(() => {
-        const t0 = Date.now();
-
         const localData = fetch("./data/data.json")
             .then(r => r.ok ? r.json() : [])
             .catch(() => []);
@@ -106,7 +73,7 @@ function Root() {
             .then(urls => {
                 if (urls.length === 0) {
                     setLoadMsg("no data files found");
-                    setTimeout(() => setAppData([]), Math.max(0, 2000 - (Date.now() - t0)));
+                    setAppData([]);
                     return null;
                 }
 
@@ -132,18 +99,7 @@ function Root() {
                 const local = await localData;
                 const merged = [...local, ...arrays.flat()].filter(isValidEntry);
 
-                const iconUrls = collectIconUrls(merged);
-                if (iconUrls.length > 0) {
-                    setLoadMsg("loading icons...");
-                    setLoadCounter(null);
-                    await preloadIcons(iconUrls, (done, total) => {
-                        setLoadCounter("(" + done + " / " + total + ")");
-                    });
-                    setLoadCounter(null);
-                }
-
-                const wait = 2000 - (Date.now() - t0);
-                setTimeout(() => setAppData(merged), Math.max(0, wait));
+                setAppData(merged);
             })
             .catch(err => {
                 if (err.rateLimit) {
