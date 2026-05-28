@@ -1,6 +1,7 @@
 [
   {
     "id": 1779979877737,
+    "group": "Teensy Hz comparison",
     "label": "250Hz",
     "samples": [
       9.561,
@@ -1028,6 +1029,7 @@
   },
   {
     "id": 1779979194964,
+    "group": "Teensy Hz comparison",
     "label": "500Hz",
     "samples": [
       7.91,
@@ -2055,6 +2057,7 @@
   },
   {
     "id": 1779978576300,
+    "group": "Teensy Hz comparison",
     "label": "1000hz",
     "samples": [
       8.357,
@@ -3082,6 +3085,7 @@
   },
   {
     "id": 1779977878577,
+    "group": "Teensy Hz comparison",
     "label": "2000hz",
     "samples": [
       7.599,
@@ -4109,6 +4113,7 @@
   },
   {
     "id": 1779977211887,
+    "group": "Teensy Hz comparison",
     "label": "4000hz",
     "samples": [
       5.75,
@@ -5136,6 +5141,7 @@
   },
   {
     "id": 1779976373860,
+    "group": "Teensy Hz comparison",
     "label": "8000hz",
     "samples": [
       6.655,
